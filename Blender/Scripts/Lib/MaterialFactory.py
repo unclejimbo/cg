@@ -16,11 +16,22 @@ class MaterialFactory:
         self.wireframecolor = (0.026, 0.831, 0.888, 1)
         self.material_name = material_name
 
+    def gammaCorrect(self, srgb):
+        if srgb < 0:
+            return 0
+        elif srgb < 0.04045:
+            return srgb / 12.92
+        else:
+            return ((srgb + 0.055) / 1.055) ** 2.4
+
     def hex2rgba(self, h):
         b = (h & 0xFF) / 255.0
         g = ((h >> 8) & 0xFF) / 255.0
         r = ((h >> 16) & 0xFF) / 255.0
-        return r, g, b, 1.0
+        linearR = self.gammaCorrect(r)
+        linearG = self.gammaCorrect(g)
+        linearB = self.gammaCorrect(b)
+        return linearR, linearG, linearB, 1.0
 
     def CreateMain(self):
         mat = bpy.data.materials.new('Main')
