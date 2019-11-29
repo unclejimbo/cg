@@ -173,6 +173,7 @@ class RenderCore:
         cuts_collection = bpy.data.collections.new('Cuts')
         scene_collection.children.link(cuts_collection)
         for i, c in enumerate(scene_json['cuts']):
+            seg = c['segment'] % 20
             p0 = mathutils.Vector(self.blender_vec(c['points'][0]))
             p1 = mathutils.Vector(self.blender_vec(c['points'][1]))
 
@@ -183,7 +184,8 @@ class RenderCore:
             edge_instance.rotation_quaternion = mathutils.Vector(
                 (0, 0, 1)).rotation_difference(p0 - p1)
             # edge_instance.type = 'COLLECTION'
-            edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(c['segment'])]
+            
+            edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(seg)]
             if self.config.show_cut == True:
                 cuts_collection.objects.link(edge_instance)
 
@@ -205,14 +207,14 @@ class RenderCore:
             vertex_instance.location = p0
             vertex_instance.scale = (0.002, 0.002, 0.002)
             # vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(c['segment'])]
+            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
             if self.config.show_cut == True:
                 cuts_collection.objects.link(vertex_instance)
             vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2 + 1), None)
             vertex_instance.location = p1
             vertex_instance.scale = (0.002, 0.002, 0.002)
             # vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(c['segment'])]
+            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
             if self.config.show_cut == True:
                 cuts_collection.objects.link(vertex_instance)
 
