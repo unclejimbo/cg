@@ -369,6 +369,20 @@ class RenderCore:
     def do_render(self):
         bpy.ops.render.render(write_still=True)
 
+    def buildOnly(self):
+        scene_file = open(self.config.scene_path + self.config.scene_name)
+        scene_json = json.load(scene_file)
+        self.clean()
+        self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
+        self.build_main_mesh(self.config.scene_path + self.config.object_name)
+        self.build_singularity_primitives()
+        self.build_segment_primitives()
+        self.build_addons(scene_json)
+        self.build_ground()
+        self.build_camera(scene_json)
+        self.build_direct_light()
+        self.build_indirect_light()
+
     def renderSingle(self):
         scene_file = open(self.config.scene_path + self.config.scene_name)
         scene_json = json.load(scene_file)
@@ -525,7 +539,9 @@ class RenderCore:
         bpy.ops.render.render(animation=True)
 
     def render(self):
-        if self.config.mode == "single":
+        if self.config.mode == 'build_only':
+            self.buildOnly()
+        elif self.config.mode == "single":
             self.renderSingle()
         elif self.config.mode == "dir":
             self.renderDir()
