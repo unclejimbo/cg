@@ -176,38 +176,64 @@ class RenderCore:
             p0 = mathutils.Vector(self.blender_vec(c['points'][0]))
             p1 = mathutils.Vector(self.blender_vec(c['points'][1]))
 
-            edge_primitive_name = 'Cut Edge Segment ' + str(c['segment'])
-            bpy.ops.object.collection_instance_add(collection=edge_primitive_name)
-            edge_obj = bpy.data.objects[edge_primitive_name + '.001']
-            edge_obj.name = 'Cut Edge Instance ' + str(i)
-            edge_obj.location = (p0 + p1) / 2
-            # edge_obj.scale = (0.002, 0.002, (p0 - p1).magnitude / 2)
-            edge_obj.scale = (self.config.edge_scale, self.config.edge_scale, (p0 - p1).magnitude / 2)
-            edge_obj.rotation_mode = 'QUATERNION'
-            edge_obj.rotation_quaternion = mathutils.Vector(
+            edge_instance = bpy.data.objects.new('Cut Edge Instance ' + str(i), None)
+            edge_instance.location = (p0 + p1) / 2
+            edge_instance.scale = (self.config.edge_scale, self.config.edge_scale, (p0 - p1).magnitude / 2)
+            edge_instance.rotation_mode = 'QUATERNION'
+            edge_instance.rotation_quaternion = mathutils.Vector(
                 (0, 0, 1)).rotation_difference(p0 - p1)
-            scene_collection.objects.unlink(edge_obj)
+            # edge_instance.type = 'COLLECTION'
+            edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(c['segment'])]
             if self.config.show_cut == True:
-                cuts_collection.objects.link(edge_obj)
+                cuts_collection.objects.link(edge_instance)
 
-            vertex_primitive_name = 'Cut Vertex Segment ' + str(c['segment'])
-            bpy.ops.object.collection_instance_add(
-                collection=vertex_primitive_name)
-            vertex_obj = bpy.data.objects[vertex_primitive_name + '.001']
-            vertex_obj.name = 'Cut Vertex Instance ' + str(i * 2)
-            vertex_obj.location = p0
-            vertex_obj.scale = (0.002, 0.002, 0.002)
-            scene_collection.objects.unlink(vertex_obj)
-            cuts_collection.objects.link(vertex_obj)
-            bpy.ops.object.collection_instance_add(
-                collection=vertex_primitive_name)
-            vertex_obj = bpy.data.objects[vertex_primitive_name + '.001']
-            vertex_obj.name = 'Cut Vertex Instance ' + str(i * 2 + 1)
-            vertex_obj.location = p1
-            vertex_obj.scale = (0.002, 0.002, 0.002)
-            scene_collection.objects.unlink(vertex_obj)
+            # edge_primitive_name = 'Cut Edge Segment ' + str(c['segment'])
+            # bpy.ops.object.collection_instance_add(collection=edge_primitive_name)
+            # edge_obj = bpy.data.objects[edge_primitive_name + '.001']
+            # edge_obj.name = 'Cut Edge Instance ' + str(i)
+            # edge_obj.location = (p0 + p1) / 2
+            # # edge_obj.scale = (0.002, 0.002, (p0 - p1).magnitude / 2)
+            # edge_obj.scale = (self.config.edge_scale, self.config.edge_scale, (p0 - p1).magnitude / 2)
+            # edge_obj.rotation_mode = 'QUATERNION'
+            # edge_obj.rotation_quaternion = mathutils.Vector(
+            #     (0, 0, 1)).rotation_difference(p0 - p1)
+            # scene_collection.objects.unlink(edge_obj)
+            # if self.config.show_cut == True:
+            #     cuts_collection.objects.link(edge_obj)
+
+            vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2), None)
+            vertex_instance.location = p0
+            vertex_instance.scale = (0.002, 0.002, 0.002)
+            # vertex_instance.instance_type = 'COLLECTION'
+            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(c['segment'])]
             if self.config.show_cut == True:
-                cuts_collection.objects.link(vertex_obj)
+                cuts_collection.objects.link(vertex_instance)
+            vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2 + 1), None)
+            vertex_instance.location = p1
+            vertex_instance.scale = (0.002, 0.002, 0.002)
+            # vertex_instance.instance_type = 'COLLECTION'
+            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(c['segment'])]
+            if self.config.show_cut == True:
+                cuts_collection.objects.link(vertex_instance)
+
+            # vertex_primitive_name = 'Cut Vertex Segment ' + str(c['segment'])
+            # bpy.ops.object.collection_instance_add(
+            #     collection=vertex_primitive_name)
+            # vertex_obj = bpy.data.objects[vertex_primitive_name + '.001']
+            # vertex_obj.name = 'Cut Vertex Instance ' + str(i * 2)
+            # vertex_obj.location = p0
+            # vertex_obj.scale = (0.002, 0.002, 0.002)
+            # scene_collection.objects.unlink(vertex_obj)
+            # cuts_collection.objects.link(vertex_obj)
+            # bpy.ops.object.collection_instance_add(
+            #     collection=vertex_primitive_name)
+            # vertex_obj = bpy.data.objects[vertex_primitive_name + '.001']
+            # vertex_obj.name = 'Cut Vertex Instance ' + str(i * 2 + 1)
+            # vertex_obj.location = p1
+            # vertex_obj.scale = (0.002, 0.002, 0.002)
+            # scene_collection.objects.unlink(vertex_obj)
+            # if self.config.show_cut == True:
+            #     cuts_collection.objects.link(vertex_obj)
 
     def build_ground(self):
         if self.config.plane == "original":
