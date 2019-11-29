@@ -83,16 +83,31 @@ class RenderCore:
         # set material
         mat = self.choose_material()
         if self.config.material == "original":
-            # set uv scale
-            scale_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
-            scale_node.operation = 'SCALE'
-            # set uv scale
-            scale_node.inputs['Scale'].default_value = self.config.uv_scale
-            texcoord_node = mat.node_tree.nodes.new(type='ShaderNodeTexCoord')
             img_node = mat.node_tree.nodes['Image Texture']
-            # link
-            mat.node_tree.links.new(texcoord_node.outputs['UV'], scale_node.inputs['Vector'])
-            mat.node_tree.links.new(scale_node.outputs['Vector'], img_node.inputs['Vector'])
+            texcoord_node = mat.node_tree.nodes.new(type='ShaderNodeTexCoord')
+            mutiply_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
+            mutiply_node.operation = 'MULTIPLY'
+            mutiply_node.inputs[1].default_value[0] = self.config.uv_multiply[0]
+            mutiply_node.inputs[1].default_value[1] = self.config.uv_multiply[1]
+            add_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
+            add_node.operation = 'ADD'
+            add_node.inputs[1].default_value[0] = self.config.uv_add[0]
+            add_node.inputs[1].default_value[1] = self.config.uv_add[1]
+            # link nodes
+            mat.node_tree.links.new(texcoord_node.outputs['UV'], mutiply_node.inputs[0])
+            mat.node_tree.links.new(mutiply_node.outputs['Vector'], add_node.inputs[0])
+            mat.node_tree.links.new(add_node.outputs['Vector'], img_node.inputs['Vector'])
+
+            # # set uv scale
+            # scale_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
+            # scale_node.operation = 'SCALE'
+            # # set uv scale
+            # scale_node.inputs['Scale'].default_value = self.config.uv_scale
+            # texcoord_node = mat.node_tree.nodes.new(type='ShaderNodeTexCoord')
+            # img_node = mat.node_tree.nodes['Image Texture']
+            # # link
+            # mat.node_tree.links.new(texcoord_node.outputs['UV'], scale_node.inputs['Vector'])
+            # mat.node_tree.links.new(scale_node.outputs['Vector'], img_node.inputs['Vector'])
 
         bpy.ops.import_scene.obj(filepath=path, use_split_objects=False)
         mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
@@ -341,6 +356,7 @@ class RenderCore:
             if 'Cut Vertex Instance' in objects[i].name \
                     or 'Cut Edge Instance' in objects[i].name \
                     or 'Singularity Instance' in objects[i].name \
+                    or 'Loops' in objects[i].name \
                     or 'Singular Faces' in object[i].name:
                 objects[i].parent = rotation_object
         objects['Mesh'].parent = rotation_object
@@ -490,7 +506,8 @@ class RenderCore:
             if 'Cut Vertex Instance' in objects[i].name \
                     or 'Cut Edge Instance' in objects[i].name \
                     or 'Singularity Instance' in objects[i].name \
-                    or 'Loops' in objects[i].name:
+                    or 'Loops' in objects[i].name \
+                    or 'Singular Faces' in object[i].name:
                 objects[i].parent = rotation_object
         objects['Mesh'].parent = rotation_object
         rotation_object.rotation_mode = 'XYZ'
