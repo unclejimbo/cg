@@ -5,10 +5,9 @@ import mathutils
 import os
 from math import radians
 import bmesh
-from mathutils import Matrix, Euler
+from mathutils import Matrix, Euler, Vector
 import numpy as np
 from MaterialFactory import MaterialFactory
-
 
 class RenderCore:
     def __init__(self, config):
@@ -97,17 +96,6 @@ class RenderCore:
             mat.node_tree.links.new(texcoord_node.outputs['UV'], mutiply_node.inputs[0])
             mat.node_tree.links.new(mutiply_node.outputs['Vector'], add_node.inputs[0])
             mat.node_tree.links.new(add_node.outputs['Vector'], img_node.inputs['Vector'])
-
-            # # set uv scale
-            # scale_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
-            # scale_node.operation = 'SCALE'
-            # # set uv scale
-            # scale_node.inputs['Scale'].default_value = self.config.uv_scale
-            # texcoord_node = mat.node_tree.nodes.new(type='ShaderNodeTexCoord')
-            # img_node = mat.node_tree.nodes['Image Texture']
-            # # link
-            # mat.node_tree.links.new(texcoord_node.outputs['UV'], scale_node.inputs['Vector'])
-            # mat.node_tree.links.new(scale_node.outputs['Vector'], img_node.inputs['Vector'])
 
         bpy.ops.import_scene.obj(filepath=path, use_split_objects=False)
         mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
@@ -199,24 +187,9 @@ class RenderCore:
             edge_instance.rotation_quaternion = mathutils.Vector(
                 (0, 0, 1)).rotation_difference(p0 - p1)
             # edge_instance.type = 'COLLECTION'
-            
             edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(seg)]
             if self.config.show_cut == True:
                 cuts_collection.objects.link(edge_instance)
-
-            # edge_primitive_name = 'Cut Edge Segment ' + str(c['segment'])
-            # bpy.ops.object.collection_instance_add(collection=edge_primitive_name)
-            # edge_obj = bpy.data.objects[edge_primitive_name + '.001']
-            # edge_obj.name = 'Cut Edge Instance ' + str(i)
-            # edge_obj.location = (p0 + p1) / 2
-            # # edge_obj.scale = (0.002, 0.002, (p0 - p1).magnitude / 2)
-            # edge_obj.scale = (self.config.edge_scale, self.config.edge_scale, (p0 - p1).magnitude / 2)
-            # edge_obj.rotation_mode = 'QUATERNION'
-            # edge_obj.rotation_quaternion = mathutils.Vector(
-            #     (0, 0, 1)).rotation_difference(p0 - p1)
-            # scene_collection.objects.unlink(edge_obj)
-            # if self.config.show_cut == True:
-            #     cuts_collection.objects.link(edge_obj)
 
             vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2), None)
             vertex_instance.location = p0
@@ -232,25 +205,6 @@ class RenderCore:
             vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
             if self.config.show_cut == True:
                 cuts_collection.objects.link(vertex_instance)
-
-            # vertex_primitive_name = 'Cut Vertex Segment ' + str(c['segment'])
-            # bpy.ops.object.collection_instance_add(
-            #     collection=vertex_primitive_name)
-            # vertex_obj = bpy.data.objects[vertex_primitive_name + '.001']
-            # vertex_obj.name = 'Cut Vertex Instance ' + str(i * 2)
-            # vertex_obj.location = p0
-            # vertex_obj.scale = (0.002, 0.002, 0.002)
-            # scene_collection.objects.unlink(vertex_obj)
-            # cuts_collection.objects.link(vertex_obj)
-            # bpy.ops.object.collection_instance_add(
-            #     collection=vertex_primitive_name)
-            # vertex_obj = bpy.data.objects[vertex_primitive_name + '.001']
-            # vertex_obj.name = 'Cut Vertex Instance ' + str(i * 2 + 1)
-            # vertex_obj.location = p1
-            # vertex_obj.scale = (0.002, 0.002, 0.002)
-            # scene_collection.objects.unlink(vertex_obj)
-            # if self.config.show_cut == True:
-            #     cuts_collection.objects.link(vertex_obj)
 
     def build_ground(self):
         if self.config.plane == "original":
@@ -283,13 +237,13 @@ class RenderCore:
             plane_obj.active_material = floor_mat
 
     def build_camera(self, scene_json):
-        # cam_json = scene_json['camera']
+        cam_json = scene_json['camera']
         cam = bpy.data.cameras['Camera']
         cam.lens_unit = 'FOV'
         cam.lens = 20
         cam_obj = bpy.data.objects.new('Camera', cam)
-        # cam_obj.location = self.blender_vec(cam_json['position'])
-        cam_obj.location = (1.3158, -0.43314, 0.89092)
+        cam_obj.location = self.blender_vec(cam_json['position'])
+        # cam_obj.location = (1.3158, -0.43314, 0.89092)
         cam_track = cam_obj.constraints.new(type='TRACK_TO')
         cam_track.target = bpy.data.objects['Mesh']
         cam_track.track_axis = 'TRACK_NEGATIVE_Z'
@@ -298,22 +252,49 @@ class RenderCore:
         bpy.context.scene.camera = cam_obj
 
     def build_direct_light(self):
-        sun = bpy.data.lights.new("Sun", type='SUN')
-        sun.energy = 2.0
-        # sun.use_shadow = False
-        sun_obj = bpy.data.objects.new('Sun', sun)
-        sun_obj.location = (0.5, 0.5, 10.0)
-        sun_obj.data.cycles.cast_shadow = False
-        bpy.context.scene.collection.objects.link(bpy.data.objects['Sun'])
+        # sun = bpy.data.lights.new("Sun", type='SUN')
+        # sun.energy = 2.0
+        # # sun.use_shadow = False
+        # sun_obj = bpy.data.objects.new('Sun', sun)
+        # sun_obj.location = (0.5, 0.5, 10.0)
+        # sun_obj.data.cycles.cast_shadow = False
+        # bpy.context.scene.collection.objects.link(bpy.data.objects['Sun'])
+
+        # get camera object
+        cam_obj = bpy.data.objects['Camera']
+        vec = cam_obj.location
+
+        # add area light
+        area = bpy.data.lights.new("Area", type = 'AREA')
+        area.energy = 50
+        area.shadow_soft_size = 0.1
+        area_obj = bpy.data.objects.new("Area", area)
+        area_obj.data.shape = 'DISK'
+        # set location
+        area_obj.location = vec
+        area_obj.location[2] = 4 * vec[2]
+        # set rotation
+        direction = area_obj.location - Vector((0, 0, 0))
+        rot_quat = direction.to_track_quat()
+        area_obj.rotation_euler = rot_quat.to_euler()
+        # enable shadow
+        area_obj.data.cycles.cast_shadow = True
+        bpy.context.scene.collection.objects.link(bpy.data.objects['Area'])
 
         # add additional lights
         light1 = bpy.data.lights.new("Sun2", type='SUN')
         light1.energy = 4
         # light1.use_shadow = False
         light_obj_1 = bpy.data.objects.new('Sun2', light1)
-        light_obj_1.location = (3.0, 3.5, 1.0)
-        # light_obj_1.rotation_euler(-80, 40, -30)
-        light_obj_1.rotation_euler = Euler((radians(-80), radians(40), radians(-30)), 'XYZ')
+        # light_obj_1.location = (3.0, 3.5, 1.0)
+        light_obj_1.location = vec * 3
+        light_obj_1.location.rotate(Euler((0, radians(15), radians(45)),'XYZ'))
+        # rotation
+        # light_obj_1.rotation_euler = Euler((radians(-80), radians(40), radians(-30)), 'XYZ')
+        direction = light_obj_1.location - Vector((0, 0, 0))
+        rot_quat = direction.to_track_quat()
+        light_obj_1.rotation_euler = rot_quat.to_euler()
+
         light_obj_1.data.cycles.cast_shadow = False
         bpy.context.scene.collection.objects.link(bpy.data.objects['Sun2'])
 
@@ -321,9 +302,19 @@ class RenderCore:
         light2.energy = 3
         # light2.use_shadow = False
         light_obj_2 = bpy.data.objects.new('Sun3', light2)
-        light_obj_2.location = (1.8, -2.1, 1.2)
+
+        # location
+        # light_obj_2.location = (1.8, -2.1, 1.2)
+        light_obj_2.location = vec * 2
+        light_obj_2.location.rotate(Euler((0, radians(15), radians(-45)),'XYZ'))
+
+        # rotation
         # light_obj_2.rotation_euler(65, 40, 30)
-        light_obj_2.rotation_euler = Euler((radians(65), radians(40), radians(30)), 'XYZ')
+        # light_obj_2.rotation_euler = Euler((radians(65), radians(40), radians(30)), 'XYZ')
+        direction = light_obj_2.location - Vector((0, 0, 0))
+        rot_quat = direction.to_track_quat()
+        light_obj_2.rotation_euler = rot_quat.to_euler()
+
         light_obj_2.data.cycles.cast_shadow = False
         bpy.context.scene.collection.objects.link(bpy.data.objects['Sun3'])
 
@@ -331,9 +322,21 @@ class RenderCore:
         light3.energy = 3.5
         # light3.use_shadow = False
         light_obj_3 = bpy.data.objects.new('Sun4', light3)
-        light_obj_3.location = (-3.0, 0.0, 0.5)
+
+        # location
+        # light_obj_3.location = (-3.0, 0.0, 0.5)
+        light_obj_3.location = vec * 4
+        # fixed z
+        light_obj_3.location.rotate(Euler((0, radians(30), radians(180)),'XYZ'))
+        light_obj_3.location[2] = 0.3
+
+        # rotation
         # light_obj_3.rotation_euler(90, 0, -90)
-        light_obj_3.rotation_euler = Euler((radians(90), radians(0), radians(-90)), 'XYZ')
+        # light_obj_3.rotation_euler = Euler((radians(90), radians(0), radians(-90)), 'XYZ')
+        direction = light_obj_3.location - Vector((0, 0, light_obj_3.location[2]))
+        rot_quat = direction.to_track_quat()
+        light_obj_3.rotation_euler = rot_quat.to_euler()
+
         light_obj_3.data.cycles.cast_shadow = False
         bpy.context.scene.collection.objects.link(bpy.data.objects['Sun4'])
 
