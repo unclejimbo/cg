@@ -244,10 +244,17 @@ class RenderCore:
         cam_obj = bpy.data.objects.new('Camera', cam)
         cam_obj.location = self.blender_vec(cam_json['position'])
         # cam_obj.location = (1.3158, -0.43314, 0.89092)
-        cam_track = cam_obj.constraints.new(type='TRACK_TO')
-        cam_track.target = bpy.data.objects['Mesh']
-        cam_track.track_axis = 'TRACK_NEGATIVE_Z'
-        cam_track.up_axis = 'UP_Y'
+        # cam_track = cam_obj.constraints.new(type='TRACK_TO')
+        # cam_track.target = bpy.data.objects['Mesh']
+        # cam_track.track_axis = 'TRACK_NEGATIVE_Z'
+        # cam_track.up_axis = 'UP_Y'ssss
+
+        # set camera rotation
+        center = Vector(self.blender_vec(cam_json['center']))
+        direction = center - cam_obj.location
+        rot_quat = direction.to_track_quat('-Z', 'Y')
+        cam_obj.rotation_euler = rot_quat.to_euler()
+
         bpy.context.scene.collection.objects.link(bpy.data.objects['Camera'])
         bpy.context.scene.camera = cam_obj
 
