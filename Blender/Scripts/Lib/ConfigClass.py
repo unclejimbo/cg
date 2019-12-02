@@ -52,7 +52,7 @@ show_cut = True
 show_singularity = True
 show_singular_face = False
 show_loops = False
-use_envmap = True
+use_envmap = False
 
 uv_multiply = (3.0, 3.0)
 uv_add = (0.05, 0.05)
