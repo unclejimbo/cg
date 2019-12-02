@@ -3,7 +3,7 @@ import json
 
 
 singular_colors = {
-    '-1':0xFF0000,'-2':0xFF4500,'-3':0x8B0000,'1':0x9932CC, '2':0xFFA500
+    '-1': 0x00F3FF, '-2': 0x0074FF, '-3': 0x0000FF, '1': 0xFFBC00, '2': 0xFF5500
 }
 
 segment_colors = [0x800000, 0xD2691E, 0x808000, 0x008080, 0x000080,
@@ -18,7 +18,7 @@ envmap_path = data_path + 'HDR/gl-hdr-02.hdr'
 
 # envmap_path = data_path + 'HDR/green_point_park_2k.hdr'
 
-blender_path =  "D:/tools/blender_2.81/blender.exe"
+blender_path = "D:/tools/blender_2.81/blender.exe"
 SCENE_PATH = "../../Scene/eight/"
 scene_name = "scene.json"
 object_name = "mesh.obj"
@@ -33,7 +33,7 @@ path = os.getcwd()
 path = os.path.dirname(path)
 path = os.path.dirname(path)
 # OUTPUT_PATH = path + "\Output\\" +  scene_name.split(".")[0]+ ".png"
-OUTPUT_PATH = path + "\Output\\" +  object_name.split(".")[0]+ ".png"
+OUTPUT_PATH = path + "\Output\\" + object_name.split(".")[0] + ".png"
 
 WIDTH = 2000
 HEIGHT = 1500
@@ -58,14 +58,14 @@ uv_add = (0.05, 0.05)
 
 
 class Config:
-    def __init__(self, singular_colors=singular_colors, segment_colors = segment_colors, data_path = data_path,
-        texture_path = texture_path, envmap_path = envmap_path, scene_path = SCENE_PATH, output_path = OUTPUT_PATH,
-                 width = WIDTH, height = HEIGHT, config_path = CONFIG_PATH, scene_name = scene_name, mode = mode,
-                 object_name = object_name, material = material, plane = plane, rotation_start = rotation_start,
-                 rotation_end = rotation_end, rotation_step = rotation_step, edge_scale = edge_scale,
-                 singularity_scale = singularity_scale, roughness = roughness, rotation_axis = rotation_axis,
-                 show_cut = show_cut, show_singularity = show_singularity, show_singular_face = show_singular_face,
-                 show_loops = show_loops, blender_path = blender_path, uv_multiply = uv_multiply, uv_add = uv_add):
+    def __init__(self, singular_colors=singular_colors, segment_colors=segment_colors, data_path=data_path,
+                 texture_path=texture_path, envmap_path=envmap_path, scene_path=SCENE_PATH, output_path=OUTPUT_PATH,
+                 width=WIDTH, height=HEIGHT, config_path=CONFIG_PATH, scene_name=scene_name, mode=mode,
+                 object_name=object_name, material=material, plane=plane, rotation_start=rotation_start,
+                 rotation_end=rotation_end, rotation_step=rotation_step, edge_scale=edge_scale,
+                 singularity_scale=singularity_scale, roughness=roughness, rotation_axis=rotation_axis,
+                 show_cut=show_cut, show_singularity=show_singularity, show_singular_face=show_singular_face,
+                 show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -128,5 +128,5 @@ class Config:
         config_dict['uv_multiply'] = self.uv_multiply
         config_dict['uv_add'] = self.uv_add
 
-        with open(self.config_path,'w') as dump_f:
+        with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)
