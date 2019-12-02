@@ -52,6 +52,7 @@ show_cut = True
 show_singularity = True
 show_singular_face = False
 show_loops = False
+use_envmap = True
 
 uv_multiply = (3.0, 3.0)
 uv_add = (0.05, 0.05)
@@ -65,7 +66,8 @@ class Config:
                  rotation_end=rotation_end, rotation_step=rotation_step, edge_scale=edge_scale,
                  singularity_scale=singularity_scale, roughness=roughness, rotation_axis=rotation_axis,
                  show_cut=show_cut, show_singularity=show_singularity, show_singular_face=show_singular_face,
-                 show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add):
+                 show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
+                 use_envmap = use_envmap):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -95,6 +97,7 @@ class Config:
         self.blender_path = blender_path
         self.uv_multiply = uv_multiply
         self.uv_add = uv_add
+        self.use_envmap = use_envmap
 
     def save_config(self):
         config_dict = {}
@@ -127,6 +130,7 @@ class Config:
         config_dict['blender_path'] = self.blender_path
         config_dict['uv_multiply'] = self.uv_multiply
         config_dict['uv_add'] = self.uv_add
+        config_dict['use_envmap'] = self.use_envmap
 
         with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)

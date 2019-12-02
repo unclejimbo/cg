@@ -343,14 +343,15 @@ class RenderCore:
     def build_indirect_light(self):
         world = bpy.context.scene.world
         world.use_nodes = True
-        texcoord_node = world.node_tree.nodes.new(type='ShaderNodeTexCoord')
-        envmap_node = world.node_tree.nodes.new(type='ShaderNodeTexEnvironment')
-        envmap_node.image = bpy.data.images.load(self.config.envmap_path)
-        world.node_tree.nodes['Background'].inputs['Strength'].default_value = 0.2
-        world.node_tree.links.new(
-            texcoord_node.outputs['Generated'], envmap_node.inputs['Vector'])
-        world.node_tree.links.new(
-            envmap_node.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
+        if self.config.use_envmap == True:
+            texcoord_node = world.node_tree.nodes.new(type='ShaderNodeTexCoord')
+            envmap_node = world.node_tree.nodes.new(type='ShaderNodeTexEnvironment')
+            envmap_node.image = bpy.data.images.load(self.config.envmap_path)
+            world.node_tree.nodes['Background'].inputs['Strength'].default_value = 0.2
+            world.node_tree.links.new(
+                texcoord_node.outputs['Generated'], envmap_node.inputs['Vector'])
+            world.node_tree.links.new(
+                envmap_node.outputs['Color'], world.node_tree.nodes['Background'].inputs['Color'])
 
     def build_rotation(self):
         objects = bpy.data.objects
