@@ -58,6 +58,8 @@ use_envmap = False
 uv_multiply = (3.0, 3.0)
 uv_add = (0.05, 0.05)
 
+# wireframe size is relative to original size
+wireframe_size = 0.2
 
 class Config:
     def __init__(self, singular_colors=singular_colors, segment_colors=segment_colors, data_path=data_path,
@@ -68,7 +70,7 @@ class Config:
                  singularity_scale=singularity_scale, roughness=roughness, rotation_axis=rotation_axis,
                  show_cut=show_cut, show_singularity=show_singularity, show_singular_face=show_singular_face,
                  show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
-                 use_envmap=use_envmap, background_render=background_render):
+                 use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -100,6 +102,7 @@ class Config:
         self.uv_add = uv_add
         self.use_envmap = use_envmap
         self.background_render = background_render
+        self.wireframe_size = wireframe_size
 
     def save_config(self):
         config_dict = {}
@@ -134,6 +137,7 @@ class Config:
         config_dict['uv_add'] = self.uv_add
         config_dict['use_envmap'] = self.use_envmap
         config_dict['background_render'] = self.background_render
+        config_dict['wireframe_size'] = self.wireframe_size
 
         with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)

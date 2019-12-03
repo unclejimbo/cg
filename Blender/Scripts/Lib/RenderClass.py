@@ -15,6 +15,7 @@ class RenderCore:
         self.MaterialFactory = MaterialFactory()
         self.MaterialFactory.texture_path = self.config.texture_path
         self.MaterialFactory.roughness = self.config.roughness
+        self.MaterialFactory.wireframe_size = self.config.wireframe_size
         self.rotation = 0
 
     def blender_vec(self, vec):

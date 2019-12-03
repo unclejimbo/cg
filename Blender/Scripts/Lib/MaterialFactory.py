@@ -14,6 +14,7 @@ class MaterialFactory:
         self.texture_path = texture_path
         self.color = color
         self.wireframecolor = (0.026, 0.831, 0.888, 1)
+        self.wireframe_size = None
         self.material_name = material_name
 
     def gammaCorrect(self, srgb):
@@ -77,7 +78,8 @@ class MaterialFactory:
         output_node = mat.node_tree.nodes['Material Output']
         # set size
         size = wire_node.inputs['Size'].default_value
-        wire_node.inputs['Size'].default_value = size / 5
+        # wire_node.inputs['Size'].default_value = size / 5
+        wire_node.inputs['Size'].default_value = size * self.wireframe_size
         mat.node_tree.links.new(bsdf_node.outputs['BSDF'], mix_node.inputs[1])
         mat.node_tree.links.new(rgb_node.outputs['Color'], wire_mat_node.inputs['Color'])
         mat.node_tree.links.new(wire_mat_node.outputs['BSDF'], mix_node.inputs[2])
@@ -106,7 +108,8 @@ class MaterialFactory:
         output_node = mat.node_tree.nodes['Material Output']
         # set size
         size = wire_node.inputs['Size'].default_value
-        wire_node.inputs['Size'].default_value = size / 5
+        # wire_node.inputs['Size'].default_value = size / 5
+        wire_node.inputs['Size'].default_value = size * self.wireframe_size
         mat.node_tree.links.new(img_node.outputs['Color'], bsdf_node.inputs['Base Color'])
         mat.node_tree.links.new(bsdf_node.outputs['BSDF'], mix_node.inputs[1])
         mat.node_tree.links.new(rgb_node.outputs['Color'], wire_mat_node.inputs['Color'])
