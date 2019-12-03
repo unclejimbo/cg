@@ -49,7 +49,7 @@ edge_scale = 0.002
 singularity_scale = 0.010
 roughness = 0.0
 
-show_cut = True
+cut_mode = 'Segment'
 show_singularity = True
 show_singular_face = False
 show_loops = False
@@ -68,7 +68,7 @@ class Config:
                  object_name=object_name, material=material, plane=plane, rotation_start=rotation_start,
                  rotation_end=rotation_end, rotation_step=rotation_step, edge_scale=edge_scale,
                  singularity_scale=singularity_scale, roughness=roughness, rotation_axis=rotation_axis,
-                 show_cut=show_cut, show_singularity=show_singularity, show_singular_face=show_singular_face,
+                 cut_mode=cut_mode, show_singularity=show_singularity, show_singular_face=show_singular_face,
                  show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
                  use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size):
         self.singular_colors = singular_colors
@@ -93,7 +93,7 @@ class Config:
         self.singularity_scale = singularity_scale
         self.roughness = roughness
         self.rotation_axis = rotation_axis
-        self.show_cut = show_cut
+        self.cut_mode = cut_mode
         self.show_singularity = show_singularity
         self.show_singular_face = show_singular_face
         self.show_loops = show_loops
@@ -128,7 +128,7 @@ class Config:
         config_dict['singularity_scale'] = self.singularity_scale
         config_dict['roughness'] = self.roughness
         config_dict['rotation_axis'] = self.rotation_axis
-        config_dict['show_cut'] = self.show_cut
+        config_dict['cut_mode'] = self.cut_mode
         config_dict['show_singularity'] = self.show_singularity
         config_dict['show_singular_face'] = self.show_singular_face
         config_dict['show_loops'] = self.show_loops

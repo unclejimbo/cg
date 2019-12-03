@@ -139,6 +139,8 @@ class RenderCore:
     def build_segment_primitives(self):
         scene_collection = bpy.context.scene.collection
         for i, color in enumerate(self.config.segment_colors):
+            if self.config.cut_mode == "Plain":
+                color = 0x808080
 
             self.MaterialFactory.color = color
             mat = self.MaterialFactory.CreateColored('Segment' + str(i))
@@ -189,7 +191,9 @@ class RenderCore:
                 (0, 0, 1)).rotation_difference(p0 - p1)
             edge_instance.instance_type = 'COLLECTION'
             edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(seg)]
-            if self.config.show_cut == True:
+            # if self.config.show_cut == True:
+            #     cuts_collection.objects.link(edge_instance)
+            if self.config.cut_mode != "None":
                 cuts_collection.objects.link(edge_instance)
 
             vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2), None)
@@ -197,14 +201,18 @@ class RenderCore:
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
             vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            if self.config.show_cut == True:
+            # if self.config.show_cut == True:
+            #     cuts_collection.objects.link(vertex_instance)
+            if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
             vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2 + 1), None)
             vertex_instance.location = p1
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
             vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            if self.config.show_cut == True:
+            # if self.config.show_cut == True:
+            #     cuts_collection.objects.link(vertex_instance)
+            if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
 
     def build_ground(self):
