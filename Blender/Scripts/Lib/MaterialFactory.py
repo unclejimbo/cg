@@ -49,6 +49,15 @@ class MaterialFactory:
             img_node.outputs['Color'], bsdf_node.inputs['Base Color'])
         return mat
 
+    def CreateVertexColor(self):
+        mat = bpy.data.materials.new('Material Vertex Color')
+        mat.use_nodes = True
+        bsdf_node = mat.node_tree.nodes['Principled BSDF']
+        vertex_color_node = mat.node_tree.nodes.new(type='ShaderNodeVertexColor')
+        vertex_color_node.layer_name = 'Col'
+        mat.node_tree.links.new(vertex_color_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+        return mat
+
     def CreateColored(self, name):
         mat = bpy.data.materials.new(name)
         mat.use_nodes = True

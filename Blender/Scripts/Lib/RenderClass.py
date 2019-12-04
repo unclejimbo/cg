@@ -62,7 +62,8 @@ class RenderCore:
         tree.links.new(render_node.outputs['Image'], originoutput_node.inputs[0])
 
     def choose_material(self):
-        material_list = ['original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe', 'peeling_paint', 'paint']
+        material_list = ['original', 'gold', 'glass', 'ceramic',
+                         'roughblue', 'wireframe', 'peeling_paint', 'paint', 'vertex_color']
         if self.config.material in material_list:
             material_function = {
                 'original': self.MaterialFactory.CreateMain(),
@@ -72,7 +73,8 @@ class RenderCore:
                 'roughblue': self.MaterialFactory.CreateRoughBlue(),
                 'wireframe' : self.MaterialFactory.CreateWireframe(),
                 'peeling_paint' : self.MaterialFactory.CreatePeelingPaint(),
-                'paint' : self.MaterialFactory.CreatePaint()
+                'paint' : self.MaterialFactory.CreatePaint(),
+                'vertex_color' : self.MaterialFactory.CreateVertexColor()
             }
             mat = material_function[self.config.material]
         else:
@@ -98,10 +100,14 @@ class RenderCore:
             mat.node_tree.links.new(mutiply_node.outputs['Vector'], add_node.inputs[0])
             mat.node_tree.links.new(add_node.outputs['Vector'], img_node.inputs['Vector'])
 
-        bpy.ops.import_scene.obj(filepath=path, use_split_objects=False)
+        if self.config.material == 'vertex_color':
+            bpy.ops.import_mesh.ply(filepath=path)
+        else:
+            bpy.ops.import_scene.obj(filepath=path, use_split_objects=False)
         mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
         mesh_obj.name = 'Mesh'
         mesh_obj.active_material = mat
+
         # rotate
         # mesh_obj.rotation_euler.rotate_axis("Y", self.rotation)
         if self.config.show_singular_face == True:
@@ -478,7 +484,7 @@ class RenderCore:
         material_list = ['original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
                          'peeling_paint', 'paint', 'Metal01', 'Metal07', 'Metal08',
                          'Metal26','WoodFloor01', 'Marble01', 'Leather05', 'Fabric02',
-                         'Fabric03', 'Concrete07', 'Chainmail02'
+                         'Fabric03', 'Concrete07', 'Chainmail02', 'vertex_color'
                          ]
         for material in material_list:
             self.config.material = material
