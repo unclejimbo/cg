@@ -83,7 +83,8 @@ def build_pbr_textured_nodes(node_tree: bpy.types.NodeTree,
     coord_node = node_tree.nodes.new(type='ShaderNodeTexCoord')
     mapping_node = node_tree.nodes.new(type='ShaderNodeMapping')
     mapping_node.vector_type = 'TEXTURE'
-    mapping_node.scale = scale
+    # mapping_node.scale = scale
+    mapping_node.inputs['Scale'].default_value = scale
     node_tree.links.new(coord_node.outputs['UV'], mapping_node.inputs['Vector'])
 
     if color_texture_path != "":

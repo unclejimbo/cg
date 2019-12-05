@@ -16,6 +16,7 @@ class RenderCore:
         self.MaterialFactory.texture_path = self.config.texture_path
         self.MaterialFactory.roughness = self.config.roughness
         self.MaterialFactory.wireframe_size = self.config.wireframe_size
+        self.MaterialFactory.material_filename = self.config.material_filename
         self.rotation = 0
 
     def blender_vec(self, vec):
@@ -62,9 +63,9 @@ class RenderCore:
         tree.links.new(render_node.outputs['Image'], originoutput_node.inputs[0])
 
     def choose_material(self):
-        material_list = ['original', 'gold', 'glass', 'ceramic',
-                         'roughblue', 'wireframe', 'peeling_paint', 'paint', 'vertex_color']
-        if self.config.material in material_list:
+        material_list = ['original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
+                        'peeling_paint', 'paint', 'vertex_color']
+        if self.config.material in material_list and self.config.material_filename is None:
             material_function = {
                 'original': self.MaterialFactory.CreateMain(),
                 'gold': self.MaterialFactory.CreateGold(),
@@ -77,8 +78,10 @@ class RenderCore:
                 'vertex_color' : self.MaterialFactory.CreateVertexColor()
             }
             mat = material_function[self.config.material]
-        else:
+        elif self.config.material_filename is None:
             mat = self.MaterialFactory.CreateFromName(self.config.material)
+        else:
+            mat = self.MaterialFactory.CreateFromFile()
         return mat
 
     def build_main_mesh(self, path):
@@ -482,9 +485,9 @@ class RenderCore:
 
     def renderModelMaterial(self):
         material_list = ['original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
-                         'peeling_paint', 'paint', 'Metal01', 'Metal07', 'Metal08',
-                         'Metal26','WoodFloor01', 'Marble01', 'Leather05', 'Fabric02',
-                         'Fabric03', 'Concrete07', 'Chainmail02', 'vertex_color'
+                         'peeling_paint', 'paint', 'Metal01',
+                         'Metal07', 'Metal08', 'Metal26','WoodFloor01', 'Marble01', 'Leather05',
+                         'Fabric02', 'Fabric03', 'Concrete07', 'Chainmail02', 'vertex_color'
                          ]
         for material in material_list:
             self.config.material = material
@@ -564,6 +567,64 @@ class RenderCore:
         scene.frame_current = 1
         bpy.ops.render.render(animation=True)
 
+    def renderPreDefined(self):
+        path = os.getcwd()
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        filename = path + "\\Data\\Materials\\predefined.blend"
+
+        scene_file = open(self.config.scene_path + self.config.scene_name)
+        scene_json = json.load(scene_file)
+        self.clean()
+        self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
+        self.build_main_mesh(self.config.scene_path + self.config.object_name)
+        self.build_singularity_primitives()
+        self.build_segment_primitives()
+        self.build_addons(scene_json)
+        # self.build_ground()
+        # self.build_camera(scene_json)
+        # self.build_direct_light()
+        self.build_indirect_light()
+
+        with bpy.data.libraries.load(filename) as (src,dst):
+            dst.objects = src.objects
+        light_1 = dst.objects[17]
+        light_2 = dst.objects[18]
+        light_3 = dst.objects[19]
+
+        # light_1.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
+        # light_2.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
+        # light_3.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
+
+        cam_json = scene_json['camera']
+        cam = dst.objects[23]
+
+        # cam.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
+        center = Vector(self.blender_vec(cam_json['center']))
+        direction = center - cam.location
+        rot_quat = direction.to_track_quat('-Z', 'Y')
+        cam.rotation_euler = rot_quat.to_euler()
+        # mesh_obj.rotation_euler.rotate_axis("Y", self.rotation)
+
+        grid = dst.objects[20]
+        number = dst.objects[10]
+        plane = dst.objects[9]
+
+        zmin = bpy.data.objects['Mesh'].bound_box[0][1]
+        grid.location[2] = zmin
+        number.location[2] = zmin
+        plane.location[2] = zmin
+
+        bpy.context.scene.collection.objects.link(light_1)
+        bpy.context.scene.collection.objects.link(light_2)
+        bpy.context.scene.collection.objects.link(light_3)
+        bpy.context.scene.collection.objects.link(cam)
+        bpy.context.scene.camera = cam
+        bpy.context.scene.collection.objects.link(grid)
+        bpy.context.scene.collection.objects.link(number)
+        bpy.context.scene.collection.objects.link(plane)
+        self.do_render()
+
     def render(self):
         if self.config.mode == 'build_only':
             self.buildOnly()
@@ -579,6 +640,8 @@ class RenderCore:
             self.renderRotation()
         elif self.config.mode == 'rotation_animation':
             self.renderRotationAnimation()
+        elif self.config.mode == 'predefined':
+            self.renderPreDefined()
 
 
 

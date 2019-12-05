@@ -15,6 +15,7 @@ class MaterialFactory:
         self.color = color
         self.wireframecolor = (0.026, 0.831, 0.888, 1)
         self.wireframe_size = None
+        self.material_filename = None
         self.material_name = material_name
 
     def gammaCorrect(self, srgb):
@@ -428,6 +429,16 @@ class MaterialFactory:
         loader.build_pbr_textured_nodes_from_name(self.material_name)
         mat = bpy.data.materials[self.material_name]
         return mat
+
+    def CreateFromFile(self):
+        path = os.getcwd()
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        filename = path + "\\Data\\Materials\\" + self.material_filename
+        with bpy.data.libraries.load(filename, link=True) as (src, dst):
+            dst.materials = src.materials
+        return dst.materials[0]
+
 
 
 
