@@ -134,8 +134,14 @@ class RenderCore:
     def build_singularity_primitives(self):
         scene_collection = bpy.context.scene.collection
         for index, color in self.config.singular_colors.items():
-            self.MaterialFactory.color = color
-            mat = self.MaterialFactory.CreateColored('Singularity' + index)
+            # self.MaterialFactory.color = color
+            # mat = self.MaterialFactory.CreateColored('Singularity' + index)
+
+            tmp = self.config.material_filename
+            # self.MaterialFactory.material_filename = "16-ruby.blend"
+            self.MaterialFactory.material_filename = "75-phone-screen.blend"
+            mat = self.MaterialFactory.CreateFromFile()
+            self.MaterialFactory.material_filename = tmp
 
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4)
             sphere = bpy.data.objects['Icosphere']
@@ -153,6 +159,11 @@ class RenderCore:
 
             self.MaterialFactory.color = color
             mat = self.MaterialFactory.CreateColored('Segment' + str(i))
+
+            # tmp = self.config.material_filename
+            # self.MaterialFactory.material_filename = "16-ruby.blend"
+            # mat = self.MaterialFactory.CreateFromFile()
+            # self.MaterialFactory.material_filename = tmp
 
             bpy.ops.mesh.primitive_cylinder_add()
             cylinder = bpy.data.objects['Cylinder']
@@ -598,6 +609,7 @@ class RenderCore:
 
         cam_json = scene_json['camera']
         cam = dst.objects[23]
+        cam.location *= 0.7
 
         # cam.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
         center = Vector(self.blender_vec(cam_json['center']))
