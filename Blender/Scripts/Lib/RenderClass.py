@@ -571,7 +571,7 @@ class RenderCore:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        filename = path + "\\Data\\Materials\\predefined.blend"
+        filename = path + "\\Data\\Materials\\predefined\\predefined.blend"
 
         scene_file = open(self.config.scene_path + self.config.scene_name)
         scene_json = json.load(scene_file)
