@@ -18,6 +18,7 @@ class RenderCore:
         self.MaterialFactory.wireframe_size = self.config.wireframe_size
         self.MaterialFactory.material_filename = self.config.material_filename
         self.MaterialFactory.wireframe_color = self.config.wireframe_color
+        self.MaterialFactory.model_color = self.config.model_color
         self.rotation = 0
 
     def blender_vec(self, vec):
@@ -65,7 +66,7 @@ class RenderCore:
 
     def choose_material(self):
         material_list = ['original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
-                        'peeling_paint', 'paint', 'vertex_color']
+                        'peeling_paint', 'paint', 'vertex_color', 'wireframe_only']
         if self.config.material in material_list and self.config.material_filename is None:
             material_function = {
                 'original': self.MaterialFactory.CreateMain(),
@@ -76,7 +77,9 @@ class RenderCore:
                 'wireframe' : self.MaterialFactory.CreateWireframe(),
                 'peeling_paint' : self.MaterialFactory.CreatePeelingPaint(),
                 'paint' : self.MaterialFactory.CreatePaint(),
-                'vertex_color' : self.MaterialFactory.CreateVertexColor()
+                'vertex_color' : self.MaterialFactory.CreateVertexColor(),
+                'wireframe_only' : self.MaterialFactory.CreateWireframeOnly()
+                # 'vertex_color_cmap' : self.MaterialFactory.CreateVertexColorCmap()
             }
             mat = material_function[self.config.material]
         elif self.config.material_filename is None:
@@ -86,6 +89,13 @@ class RenderCore:
         return mat
 
     def build_main_mesh(self, path):
+        if self.config.material == 'vertex_color':
+            bpy.ops.import_mesh.ply(filepath=path)
+        else:
+            bpy.ops.import_scene.obj(filepath=path, use_split_objects=False)
+
+        mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
+        mesh_obj.name = 'Mesh'
         # set material
         mat = self.choose_material()
         if self.config.material == "original":
@@ -103,13 +113,6 @@ class RenderCore:
             mat.node_tree.links.new(texcoord_node.outputs['UV'], mutiply_node.inputs[0])
             mat.node_tree.links.new(mutiply_node.outputs['Vector'], add_node.inputs[0])
             mat.node_tree.links.new(add_node.outputs['Vector'], img_node.inputs['Vector'])
-
-        if self.config.material == 'vertex_color':
-            bpy.ops.import_mesh.ply(filepath=path)
-        else:
-            bpy.ops.import_scene.obj(filepath=path, use_split_objects=False)
-        mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
-        mesh_obj.name = 'Mesh'
         mesh_obj.active_material = mat
 
         # rotate
@@ -117,16 +120,30 @@ class RenderCore:
         if self.config.show_singular_face == True:
             # build singular faces
             # set material
-            self.MaterialFactory.wireframecolor = (0.026, 0.831, 0.888, 1)
-            mat = self.MaterialFactory.CreateColoredWireframe()
+            if self.config.singular_face_material is None:
+                self.MaterialFactory.wireframecolor = (0.026, 0.831, 0.888, 1)
+                mat = self.MaterialFactory.CreateColoredWireframe()
+            else:
+                tmp = self.config.material_filename
+                self.MaterialFactory.material_filename = self.config.singular_face_material
+                mat = self.MaterialFactory.CreateFromFile()
+                self.MaterialFactory.material_filename = tmp
+
             bpy.ops.import_scene.obj(filepath=self.config.scene_path + "singularFaces.obj", use_split_objects=False)
             face_obj = bpy.data.objects["singularFaces"]
             face_obj.name = 'Singular Faces'
             face_obj.active_material = mat
         if self.config.show_loops == True:
             # build loop mesh
-            self.MaterialFactory.wireframecolor = (0.888, 0.888, 0, 1)
-            mat = self.MaterialFactory.CreateColoredWireframe()
+            if self.config.loop_material is None:
+                self.MaterialFactory.wireframecolor = (0.888, 0.888, 0, 1)
+                mat = self.MaterialFactory.CreateColoredWireframe()
+            else:
+                tmp = self.config.material_filename
+                self.MaterialFactory.material_filename = self.config.loop_material
+                mat = self.MaterialFactory.CreateFromFile()
+                self.MaterialFactory.material_filename = tmp
+
             bpy.ops.import_scene.obj(filepath=self.config.scene_path + "loops.obj", use_split_objects=False)
             loop_obj = bpy.data.objects["loops"]
             loop_obj.name = 'Loops'
@@ -135,14 +152,14 @@ class RenderCore:
     def build_singularity_primitives(self):
         scene_collection = bpy.context.scene.collection
         for index, color in self.config.singular_colors.items():
-            # self.MaterialFactory.color = color
-            # mat = self.MaterialFactory.CreateColored('Singularity' + index)
-
-            tmp = self.config.material_filename
-            # self.MaterialFactory.material_filename = "16-ruby.blend"
-            self.MaterialFactory.material_filename = "75-phone-screen.blend"
-            mat = self.MaterialFactory.CreateFromFile()
-            self.MaterialFactory.material_filename = tmp
+            if self.config.singularity_material is None:
+                self.MaterialFactory.color = color
+                mat = self.MaterialFactory.CreateColored('Singularity' + index)
+            else:
+                tmp = self.config.material_filename
+                self.MaterialFactory.material_filename = self.config.singularity_material
+                mat = self.MaterialFactory.CreateFromFile()
+                self.MaterialFactory.material_filename = tmp
 
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4)
             sphere = bpy.data.objects['Icosphere']
@@ -158,8 +175,14 @@ class RenderCore:
             if self.config.cut_mode == "Plain":
                 color = 0x808080
 
-            self.MaterialFactory.color = color
-            mat = self.MaterialFactory.CreateColored('Segment' + str(i))
+            if self.config.edge_material is None:
+                self.MaterialFactory.color = color
+                mat = self.MaterialFactory.CreateColored('Segment' + str(i))
+            else:
+                tmp = self.config.material_filename
+                self.MaterialFactory.material_filename = self.config.edge_material
+                mat = self.MaterialFactory.CreateFromFile()
+                self.MaterialFactory.material_filename = tmp
 
             # tmp = self.config.material_filename
             # self.MaterialFactory.material_filename = "16-ruby.blend"

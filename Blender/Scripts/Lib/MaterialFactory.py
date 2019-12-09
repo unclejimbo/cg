@@ -5,6 +5,7 @@ import mathutils
 import os
 import sys
 import cc0assetsloader as loader
+import matplotlib.pyplot as plt
 
 
 class MaterialFactory:
@@ -18,6 +19,7 @@ class MaterialFactory:
         self.material_filename = None
         self.material_name = None
         self.wireframe_color = (0, 0, 0, 1.0)
+        self.model_color = None
 
     def gammaCorrect(self, srgb):
         if srgb < 0:
@@ -60,6 +62,26 @@ class MaterialFactory:
         mat.node_tree.links.new(vertex_color_node.outputs['Color'], bsdf_node.inputs['Base Color'])
         return mat
 
+    # def CreateVertexColorCmap(self):
+    #     mat = bpy.data.materials.new('Material Vertex Color Cmap')
+    #     mat.use_nodes = True
+    #     bsdf_node = mat.node_tree.nodes['Principled BSDF']
+    #     vertex_color_node = mat.node_tree.nodes.new(type='ShaderNodeVertexColor')
+    #     mesh = bpy.data.objects['Mesh'].data
+    #     mesh.vertex_colors.new(name = 'Col')
+    #     vertices = mesh.vertices
+    #     max = -100
+    #     for i in range(len(vertices)):
+    #         print(vertices[i].to_tuple())
+    #         if vertices[i][0] > max:
+    #             max = vertices[i][0]
+    #     for index, vertex_color in enumerate(mesh.vertex_colors['Col'].data):
+    #         # vertex_color.color = plt.cm.hot(index/len(mesh.vertex_colors['Col'].data))
+    #         vertex_color.color = plt.cm.hot(vertices[index][0]/max)
+    #     vertex_color_node.layer_name = 'Col'
+    #     mat.node_tree.links.new(vertex_color_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+    #     return mat
+
     def CreateColored(self, name):
         mat = bpy.data.materials.new(name)
         mat.use_nodes = True
@@ -71,6 +93,7 @@ class MaterialFactory:
         mat.node_tree.links.new(
             color_node.outputs['Color'], output_node.inputs['Surface'])
         return mat
+
 
     def CreateColoredWireframe(self):
         mat = bpy.data.materials.new('Material Colored Wireframe')
@@ -122,6 +145,35 @@ class MaterialFactory:
         # wire_node.inputs['Size'].default_value = size / 5
         wire_node.inputs['Size'].default_value = size * self.wireframe_size
         mat.node_tree.links.new(img_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+        mat.node_tree.links.new(bsdf_node.outputs['BSDF'], mix_node.inputs[1])
+        mat.node_tree.links.new(rgb_node.outputs['Color'], wire_mat_node.inputs['Color'])
+        mat.node_tree.links.new(wire_mat_node.outputs['BSDF'], mix_node.inputs[2])
+        mat.node_tree.links.new(wire_node.outputs['Fac'], mix_node.inputs['Fac'])
+        mat.node_tree.links.new(mix_node.outputs['Shader'], output_node.inputs['Surface'])
+        return mat
+
+    def CreateWireframeOnly(self):
+        mat = bpy.data.materials.new('Material Wireframe')
+        mat.use_nodes = True
+        bsdf_node = mat.node_tree.nodes['Principled BSDF']
+        bsdf_node.inputs['Roughness'].default_value = self.roughness
+        bsdf_node.inputs['Specular'].default_value = self.specular
+
+        mix_node = mat.node_tree.nodes.new(type='ShaderNodeMixShader')
+        wire_node = mat.node_tree.nodes.new(type='ShaderNodeWireframe')
+        wire_mat_node = mat.node_tree.nodes.new(type='ShaderNodeBsdfDiffuse')
+        rgb_node = mat.node_tree.nodes.new(type='ShaderNodeRGB')
+        # rgb_node.outputs['Color'].default_value = (0.1, 0.1, 0.1, 1.0)
+        # color
+        # rgb_node.outputs['Color'].default_value = (0.1, 0.1, 0.1, 1.0)
+        rgb_node.outputs['Color'].default_value = self.wireframe_color
+        # rgb_node.outputs['Color'].default_value = (0, 1, 0, 1.0)
+        output_node = mat.node_tree.nodes['Material Output']
+        # set size
+        size = wire_node.inputs['Size'].default_value
+        # wire_node.inputs['Size'].default_value = size / 5
+        wire_node.inputs['Size'].default_value = size * self.wireframe_size
+        bsdf_node.inputs['Base Color'].default_value = self.model_color
         mat.node_tree.links.new(bsdf_node.outputs['BSDF'], mix_node.inputs[1])
         mat.node_tree.links.new(rgb_node.outputs['Color'], wire_mat_node.inputs['Color'])
         mat.node_tree.links.new(wire_mat_node.outputs['BSDF'], mix_node.inputs[2])

@@ -46,7 +46,13 @@ mode = "single"
 material = "original"
 
 edge_scale = 0.002
+edge_material = None
+
 singularity_scale = 0.010
+singularity_material = "75-phone-screen.blend"
+singular_face_material = None
+loop_material = None
+
 roughness = 0.0
 
 cut_mode = 'Segment'
@@ -64,6 +70,8 @@ wireframe_color = (0, 0, 0, 1.0)
 
 material_filename = None
 
+model_color = (1.0, 1.0, 1.0, 1.0)
+
 class Config:
     def __init__(self, singular_colors=singular_colors, segment_colors=segment_colors, data_path=data_path,
                  texture_path=texture_path, envmap_path=envmap_path, scene_path=SCENE_PATH, output_path=OUTPUT_PATH,
@@ -74,7 +82,9 @@ class Config:
                  cut_mode=cut_mode, show_singularity=show_singularity, show_singular_face=show_singular_face,
                  show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
                  use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size,
-                 material_filename = material_filename, wireframe_color = wireframe_color):
+                 material_filename = material_filename, wireframe_color = wireframe_color,
+                 singularity_material = singularity_material, edge_material = edge_material, model_color = model_color,
+                 loop_material = loop_material):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -109,6 +119,10 @@ class Config:
         self.wireframe_size = wireframe_size
         self.material_filename = material_filename
         self.wireframe_color = wireframe_color
+        self.singularity_material = singularity_material
+        self.edge_material = edge_material
+        self.model_color = model_color
+        self.loop_material = loop_material
 
     def save_config(self):
         config_dict = {}
@@ -146,6 +160,10 @@ class Config:
         config_dict['wireframe_size'] = self.wireframe_size
         config_dict['material_filename'] = self.material_filename
         config_dict['wireframe_color'] = self.wireframe_color
+        config_dict['singularity_material'] = self.singularity_material
+        config_dict['edge_material'] = self.edge_material
+        config_dict['model_color'] = self.model_color
+        config_dict['loop_material'] = self.loop_material
 
         with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)
