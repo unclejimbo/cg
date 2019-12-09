@@ -13,7 +13,8 @@ class Strebel:
         self.colormap_name = "jet"
         self.number = 10
         self.line_width = 2
-        self.line_color = ["#FF4081"]
+        self.line_color_x = ["#FF4081"]
+        self.line_color_y = ["#FF4081"]
         self.image_color = "white"
         self.critical_line_color_x = "red"
         self.critical_line_color_y = "black"
@@ -224,7 +225,7 @@ class Strebel:
         size = self.size
         widthline = self.line_width * 3
         colorCritical = self.critical_color_x
-        lineColors = self.line_color
+        lineColors = self.line_color_x
 
         interval = size / n
         start = 1
@@ -248,7 +249,7 @@ class Strebel:
         size = self.size
         widthline = self.line_width * 3
         colorCritical = self.critical_color_y
-        lineColors = self.line_color
+        lineColors = self.line_color_y
 
         interval = size / n
         start = 1

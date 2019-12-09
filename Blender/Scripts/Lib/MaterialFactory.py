@@ -8,15 +8,16 @@ import cc0assetsloader as loader
 
 
 class MaterialFactory:
-    def __init__(self, roughness=0.0, specular=0.0, texture_path = None, color = None, material_name = None):
-        self.roughness = roughness
-        self.specular = specular
-        self.texture_path = texture_path
-        self.color = color
+    def __init__(self):
+        self.roughness = 0.0
+        self.specular = 0.0
+        self.texture_path = None
+        self.color = None
         self.wireframecolor = (0.026, 0.831, 0.888, 1)
         self.wireframe_size = None
         self.material_filename = None
-        self.material_name = material_name
+        self.material_name = None
+        self.wireframe_color = (0, 0, 0, 1.0)
 
     def gammaCorrect(self, srgb):
         if srgb < 0:
@@ -84,7 +85,7 @@ class MaterialFactory:
         wire_mat_node = mat.node_tree.nodes.new(type='ShaderNodeBsdfDiffuse')
         rgb_node = mat.node_tree.nodes.new(type='ShaderNodeRGB')
         # color
-        rgb_node.outputs['Color'].default_value = (0, 0, 0, 1.0)
+        rgb_node.outputs['Color'].default_value = self.wireframe_color
         output_node = mat.node_tree.nodes['Material Output']
         # set size
         size = wire_node.inputs['Size'].default_value

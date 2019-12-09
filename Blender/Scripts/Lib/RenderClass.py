@@ -17,6 +17,7 @@ class RenderCore:
         self.MaterialFactory.roughness = self.config.roughness
         self.MaterialFactory.wireframe_size = self.config.wireframe_size
         self.MaterialFactory.material_filename = self.config.material_filename
+        self.MaterialFactory.wireframe_color = self.config.wireframe_color
         self.rotation = 0
 
     def blender_vec(self, vec):
@@ -288,13 +289,6 @@ class RenderCore:
         bpy.context.scene.camera = cam_obj
 
     def build_direct_light(self):
-        # sun = bpy.data.lights.new("Sun", type='SUN')
-        # sun.energy = 2.0
-        # # sun.use_shadow = False
-        # sun_obj = bpy.data.objects.new('Sun', sun)
-        # sun_obj.location = (0.5, 0.5, 10.0)
-        # sun_obj.data.cycles.cast_shadow = False
-        # bpy.context.scene.collection.objects.link(bpy.data.objects['Sun'])
 
         # get camera object
         cam_obj = bpy.data.objects['Camera']
@@ -322,15 +316,12 @@ class RenderCore:
         light1.energy = 4
         # light1.use_shadow = False
         light_obj_1 = bpy.data.objects.new('Sun2', light1)
-        # light_obj_1.location = (3.0, 3.5, 1.0)
         light_obj_1.location = vec * 3
         light_obj_1.location.rotate(Euler((0, radians(15), radians(45)),'XYZ'))
         # rotation
-        # light_obj_1.rotation_euler = Euler((radians(-80), radians(40), radians(-30)), 'XYZ')
         direction = light_obj_1.location - Vector((0, 0, 0))
         rot_quat = direction.to_track_quat()
         light_obj_1.rotation_euler = rot_quat.to_euler()
-
         light_obj_1.data.cycles.cast_shadow = False
         bpy.context.scene.collection.objects.link(bpy.data.objects['Sun2'])
 
@@ -338,19 +329,13 @@ class RenderCore:
         light2.energy = 3
         # light2.use_shadow = False
         light_obj_2 = bpy.data.objects.new('Sun3', light2)
-
         # location
-        # light_obj_2.location = (1.8, -2.1, 1.2)
         light_obj_2.location = vec * 2
         light_obj_2.location.rotate(Euler((0, radians(15), radians(-45)),'XYZ'))
-
         # rotation
-        # light_obj_2.rotation_euler(65, 40, 30)
-        # light_obj_2.rotation_euler = Euler((radians(65), radians(40), radians(30)), 'XYZ')
         direction = light_obj_2.location - Vector((0, 0, 0))
         rot_quat = direction.to_track_quat()
         light_obj_2.rotation_euler = rot_quat.to_euler()
-
         light_obj_2.data.cycles.cast_shadow = False
         bpy.context.scene.collection.objects.link(bpy.data.objects['Sun3'])
 
@@ -358,21 +343,15 @@ class RenderCore:
         light3.energy = 3.5
         # light3.use_shadow = False
         light_obj_3 = bpy.data.objects.new('Sun4', light3)
-
         # location
-        # light_obj_3.location = (-3.0, 0.0, 0.5)
         light_obj_3.location = vec * 4
         # fixed z
         light_obj_3.location.rotate(Euler((0, radians(30), radians(180)),'XYZ'))
         light_obj_3.location[2] = 0.3
-
         # rotation
-        # light_obj_3.rotation_euler(90, 0, -90)
-        # light_obj_3.rotation_euler = Euler((radians(90), radians(0), radians(-90)), 'XYZ')
         direction = light_obj_3.location - Vector((0, 0, light_obj_3.location[2]))
         rot_quat = direction.to_track_quat()
         light_obj_3.rotation_euler = rot_quat.to_euler()
-
         light_obj_3.data.cycles.cast_shadow = False
         bpy.context.scene.collection.objects.link(bpy.data.objects['Sun4'])
 
@@ -592,9 +571,6 @@ class RenderCore:
         self.build_singularity_primitives()
         self.build_segment_primitives()
         self.build_addons(scene_json)
-        # self.build_ground()
-        # self.build_camera(scene_json)
-        # self.build_direct_light()
         self.build_indirect_light()
 
         with bpy.data.libraries.load(filename) as (src,dst):
@@ -603,15 +579,10 @@ class RenderCore:
         light_2 = dst.objects[18]
         light_3 = dst.objects[19]
 
-        # light_1.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
-        # light_2.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
-        # light_3.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
-
         cam_json = scene_json['camera']
         cam = dst.objects[23]
-        cam.location *= 0.7
+        cam.location *= 0.8
 
-        # cam.location.rotate(Euler((0, radians(0), radians(50)),'XYZ'))
         center = Vector(self.blender_vec(cam_json['center']))
         direction = center - cam.location
         rot_quat = direction.to_track_quat('-Z', 'Y')
