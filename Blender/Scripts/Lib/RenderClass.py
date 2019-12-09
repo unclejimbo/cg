@@ -22,13 +22,13 @@ class RenderCore:
                 self.config.wireframe_color = (0, 0, 0, 1.0)
             if self.config.wireframe_mode == 2:
                 self.config.texture_path = path + "/Data/Texture/checkerboard_blue.png"
-                self.config.wireframe_color = (1, 0.8, 0.6, 1.0)
+                self.config.wireframe_color = (0.4, 0.2, 0.4, 1.0)
             if self.config.wireframe_mode == 3:
                 self.config.texture_path = path + "/Data/Texture/checkerboard_red.png"
                 self.config.wireframe_color = (0.2, 0.2, 0.6, 1.0)
             if self.config.wireframe_mode == 4:
                 self.config.texture_path = path + "/Data/Texture/checkerboard_yellow.png"
-                self.config.wireframe_color = (1, 0.4, 0.4, 1.0)
+                self.config.wireframe_color = (0, 0.2, 0.4, 1.0)
             if self.config.wireframe_mode == 5:
                 self.config.texture_path = path + "/Data/Texture/checkerboard_orange.png"
                 self.config.wireframe_color = (1, 0.8, 0.8, 1.0)
