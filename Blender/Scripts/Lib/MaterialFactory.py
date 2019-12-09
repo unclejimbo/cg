@@ -114,7 +114,7 @@ class MaterialFactory:
         # rgb_node.outputs['Color'].default_value = (0.1, 0.1, 0.1, 1.0)
         # color
         # rgb_node.outputs['Color'].default_value = (0.1, 0.1, 0.1, 1.0)
-        rgb_node.outputs['Color'].default_value = (0, 0, 0, 1.0)
+        rgb_node.outputs['Color'].default_value = self.wireframe_color
         # rgb_node.outputs['Color'].default_value = (0, 1, 0, 1.0)
         output_node = mat.node_tree.nodes['Material Output']
         # set size
