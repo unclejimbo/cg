@@ -55,13 +55,12 @@ show_singular_face = False
 show_loops = False
 use_envmap = False
 
-uv_multiply = (3.0, 3.0)
+uv_multiply = (1.5, 1.5)
 uv_add = (0.05, 0.05)
 
 # wireframe size is relative to original size
 wireframe_size = 0.2
 wireframe_color = (0, 0, 0, 1.0)
-wireframe_mode = 1
 
 material_filename = None
 
@@ -75,7 +74,7 @@ class Config:
                  cut_mode=cut_mode, show_singularity=show_singularity, show_singular_face=show_singular_face,
                  show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
                  use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size,
-                 material_filename = material_filename, wireframe_color = wireframe_color, wireframe_mode = wireframe_mode):
+                 material_filename = material_filename, wireframe_color = wireframe_color):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -110,7 +109,6 @@ class Config:
         self.wireframe_size = wireframe_size
         self.material_filename = material_filename
         self.wireframe_color = wireframe_color
-        self.wireframe_mode = wireframe_mode
 
     def save_config(self):
         config_dict = {}
@@ -148,7 +146,6 @@ class Config:
         config_dict['wireframe_size'] = self.wireframe_size
         config_dict['material_filename'] = self.material_filename
         config_dict['wireframe_color'] = self.wireframe_color
-        config_dict['wireframe_mode'] = self.wireframe_mode
 
         with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)
