@@ -5,7 +5,7 @@ import mathutils
 import os
 import sys
 import cc0assetsloader as loader
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 class MaterialFactory:
