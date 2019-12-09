@@ -25,6 +25,7 @@ class Strebel:
         self.checkerboard_linewidth = 10
         self.circle_color = "black"
         self.line_number = 6
+        self.circle_line_width = 5
 
         path = os.getcwd()
         path = os.path.dirname(path)
@@ -194,7 +195,7 @@ class Strebel:
         for i in range(n):
             for j in range(n):
                 corners = [width * i, width * j, width * (i + 1), width * (j + 1)]
-                draw.arc(corners, 0, 360, fill=color)
+                draw.arc(corners, 0, 360, fill=color, width = self.circle_line_width)
 
         draw.line([(0, 0), (0, size - 1)], fill="red", width=1)
         draw.line([(size - 1, 0), (size - 1, size - 1)], fill="red", width=1)
