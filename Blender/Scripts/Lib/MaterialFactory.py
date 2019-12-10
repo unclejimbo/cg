@@ -504,13 +504,3 @@ class MaterialFactory:
         return dst.materials[0]
 
 
-
-
-
-
-
-
-
-
-
-

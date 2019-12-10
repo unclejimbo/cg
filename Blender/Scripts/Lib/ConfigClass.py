@@ -22,9 +22,10 @@ blender_path = "D:/tools/blender_2.81/blender.exe"
 background_render = False
 SCENE_PATH = "../../Scene/eight/"
 scene_name = "scene.json"
+scene = "eight"
 object_name = "mesh.obj"
 
-plane = "original"
+plane = "predefined"
 rotation_start = 0
 rotation_end = 360
 rotation_step = 1
@@ -82,7 +83,7 @@ class Config:
                  cut_mode=cut_mode, show_singularity=show_singularity, show_singular_face=show_singular_face,
                  show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
                  use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size,
-                 material_filename = material_filename, wireframe_color = wireframe_color,
+                 material_filename = material_filename, wireframe_color = wireframe_color, scene = scene,
                  singularity_material = singularity_material, edge_material = edge_material, model_color = model_color,
                  loop_material = loop_material):
         self.singular_colors = singular_colors
@@ -119,6 +120,7 @@ class Config:
         self.wireframe_size = wireframe_size
         self.material_filename = material_filename
         self.wireframe_color = wireframe_color
+        self.scene = scene
         self.singularity_material = singularity_material
         self.edge_material = edge_material
         self.model_color = model_color
@@ -160,6 +162,7 @@ class Config:
         config_dict['wireframe_size'] = self.wireframe_size
         config_dict['material_filename'] = self.material_filename
         config_dict['wireframe_color'] = self.wireframe_color
+        config_dict['scene'] = self.scene
         config_dict['singularity_material'] = self.singularity_material
         config_dict['edge_material'] = self.edge_material
         config_dict['model_color'] = self.model_color

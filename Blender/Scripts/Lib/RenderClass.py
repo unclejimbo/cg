@@ -289,95 +289,145 @@ class RenderCore:
             node_tree.links.new(checker_texture_node.outputs['Color'], principled_node.inputs['Base Color'])
             node_tree.links.new(principled_node.outputs['BSDF'], output_node.inputs['Surface'])
             plane_obj.active_material = floor_mat
+        elif self.config.plane == "predefined":
+            path = os.getcwd()
+            path = os.path.dirname(path)
+            path = os.path.dirname(path)
+            filename = path + "/Data/Materials/predefined/predefined.blend"
+            with bpy.data.libraries.load(filename) as (src, dst):
+                dst.objects = src.objects
+            grid = dst.objects[20]
+            number = dst.objects[10]
+            plane = dst.objects[9]
+            zmin = bpy.data.objects['Mesh'].bound_box[0][1]
+            grid.location[2] = zmin
+            number.location[2] = zmin
+            plane.location[2] = zmin
+            bpy.context.scene.collection.objects.link(grid)
+            bpy.context.scene.collection.objects.link(number)
+            bpy.context.scene.collection.objects.link(plane)
 
     def build_camera(self, scene_json):
+        path = os.getcwd()
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        filename = path + "/Data/Materials/predefined/predefined.blend"
+        with bpy.data.libraries.load(filename) as (src,dst):
+            dst.objects = src.objects
+
         cam_json = scene_json['camera']
-        cam = bpy.data.cameras['Camera']
-        cam.lens_unit = 'FOV'
-        cam.lens = 20
-        cam_obj = bpy.data.objects.new('Camera', cam)
-        cam_obj.location = self.blender_vec(cam_json['position'])
-        # cam_obj.location = (1.3158, -0.43314, 0.89092)
-        # cam_track = cam_obj.constraints.new(type='TRACK_TO')
-        # cam_track.target = bpy.data.objects['Mesh']
-        # cam_track.track_axis = 'TRACK_NEGATIVE_Z'
-        # cam_track.up_axis = 'UP_Y'ssss
+        cam = dst.objects[23]
+        cam.location *= 0.8
 
-        # set camera rotation
         center = Vector(self.blender_vec(cam_json['center']))
-        direction = center - cam_obj.location
+        direction = center - cam.location
         rot_quat = direction.to_track_quat('-Z', 'Y')
-        cam_obj.rotation_euler = rot_quat.to_euler()
+        cam.rotation_euler = rot_quat.to_euler()
 
-        bpy.context.scene.collection.objects.link(bpy.data.objects['Camera'])
-        bpy.context.scene.camera = cam_obj
+        bpy.context.scene.collection.objects.link(cam)
+        bpy.context.scene.camera = cam
+
+        # cam_json = scene_json['camera']
+        # cam = bpy.data.cameras['Camera']
+        # cam.lens_unit = 'FOV'
+        # cam.lens = 20
+        # cam_obj = bpy.data.objects.new('Camera', cam)
+        # cam_obj.location = self.blender_vec(cam_json['position'])
+        # # cam_obj.location = (1.3158, -0.43314, 0.89092)
+        # # cam_track = cam_obj.constraints.new(type='TRACK_TO')
+        # # cam_track.target = bpy.data.objects['Mesh']
+        # # cam_track.track_axis = 'TRACK_NEGATIVE_Z'
+        # # cam_track.up_axis = 'UP_Y'ssss
+        #
+        # # set camera rotation
+        # center = Vector(self.blender_vec(cam_json['center']))
+        # direction = center - cam_obj.location
+        # rot_quat = direction.to_track_quat('-Z', 'Y')
+        # cam_obj.rotation_euler = rot_quat.to_euler()
+        #
+        # bpy.context.scene.collection.objects.link(bpy.data.objects['Camera'])
+        # bpy.context.scene.camera = cam_obj
 
     def build_direct_light(self):
+        path = os.getcwd()
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        filename = path + "/Data/Materials/predefined/predefined.blend"
+        with bpy.data.libraries.load(filename) as (src,dst):
+            dst.objects = src.objects
 
-        # get camera object
-        cam_obj = bpy.data.objects['Camera']
-        vec = cam_obj.location
+        light_1 = dst.objects[17]
+        light_2 = dst.objects[18]
+        light_3 = dst.objects[19]
 
-        # add area light
-        area = bpy.data.lights.new("Area", type = 'AREA')
-        area.energy = 50
-        area.shadow_soft_size = 0.1
-        area_obj = bpy.data.objects.new("Area", area)
-        area_obj.data.shape = 'DISK'
-        # set location
-        area_obj.location = vec
-        area_obj.location[2] = 4 * vec[2]
-        # set rotation
-        direction = area_obj.location - Vector((0, 0, 0))
-        rot_quat = direction.to_track_quat()
-        area_obj.rotation_euler = rot_quat.to_euler()
-        # enable shadow
-        area_obj.data.cycles.cast_shadow = True
-        bpy.context.scene.collection.objects.link(bpy.data.objects['Area'])
+        bpy.context.scene.collection.objects.link(light_1)
+        bpy.context.scene.collection.objects.link(light_2)
+        bpy.context.scene.collection.objects.link(light_3)
 
-        # add additional lights
-        light1 = bpy.data.lights.new("Sun2", type='SUN')
-        light1.energy = 4
-        # light1.use_shadow = False
-        light_obj_1 = bpy.data.objects.new('Sun2', light1)
-        light_obj_1.location = vec * 3
-        light_obj_1.location.rotate(Euler((0, radians(15), radians(45)),'XYZ'))
-        # rotation
-        direction = light_obj_1.location - Vector((0, 0, 0))
-        rot_quat = direction.to_track_quat()
-        light_obj_1.rotation_euler = rot_quat.to_euler()
-        light_obj_1.data.cycles.cast_shadow = False
-        bpy.context.scene.collection.objects.link(bpy.data.objects['Sun2'])
-
-        light2 = bpy.data.lights.new("Sun3", type='SUN')
-        light2.energy = 3
-        # light2.use_shadow = False
-        light_obj_2 = bpy.data.objects.new('Sun3', light2)
-        # location
-        light_obj_2.location = vec * 2
-        light_obj_2.location.rotate(Euler((0, radians(15), radians(-45)),'XYZ'))
-        # rotation
-        direction = light_obj_2.location - Vector((0, 0, 0))
-        rot_quat = direction.to_track_quat()
-        light_obj_2.rotation_euler = rot_quat.to_euler()
-        light_obj_2.data.cycles.cast_shadow = False
-        bpy.context.scene.collection.objects.link(bpy.data.objects['Sun3'])
-
-        light3 = bpy.data.lights.new("Sun4", type='SUN')
-        light3.energy = 3.5
-        # light3.use_shadow = False
-        light_obj_3 = bpy.data.objects.new('Sun4', light3)
-        # location
-        light_obj_3.location = vec * 4
-        # fixed z
-        light_obj_3.location.rotate(Euler((0, radians(30), radians(180)),'XYZ'))
-        light_obj_3.location[2] = 0.3
-        # rotation
-        direction = light_obj_3.location - Vector((0, 0, light_obj_3.location[2]))
-        rot_quat = direction.to_track_quat()
-        light_obj_3.rotation_euler = rot_quat.to_euler()
-        light_obj_3.data.cycles.cast_shadow = False
-        bpy.context.scene.collection.objects.link(bpy.data.objects['Sun4'])
+        # # get camera object
+        # cam_obj = bpy.data.objects['Camera']
+        # vec = cam_obj.location
+        #
+        # # add area light
+        # area = bpy.data.lights.new("Area", type = 'AREA')
+        # area.energy = 50
+        # area.shadow_soft_size = 0.1
+        # area_obj = bpy.data.objects.new("Area", area)
+        # area_obj.data.shape = 'DISK'
+        # # set location
+        # area_obj.location = vec
+        # area_obj.location[2] = 4 * vec[2]
+        # # set rotation
+        # direction = area_obj.location - Vector((0, 0, 0))
+        # rot_quat = direction.to_track_quat()
+        # area_obj.rotation_euler = rot_quat.to_euler()
+        # # enable shadow
+        # area_obj.data.cycles.cast_shadow = True
+        # bpy.context.scene.collection.objects.link(bpy.data.objects['Area'])
+        #
+        # # add additional lights
+        # light1 = bpy.data.lights.new("Sun2", type='SUN')
+        # light1.energy = 4
+        # # light1.use_shadow = False
+        # light_obj_1 = bpy.data.objects.new('Sun2', light1)
+        # light_obj_1.location = vec * 3
+        # light_obj_1.location.rotate(Euler((0, radians(15), radians(45)),'XYZ'))
+        # # rotation
+        # direction = light_obj_1.location - Vector((0, 0, 0))
+        # rot_quat = direction.to_track_quat()
+        # light_obj_1.rotation_euler = rot_quat.to_euler()
+        # light_obj_1.data.cycles.cast_shadow = False
+        # bpy.context.scene.collection.objects.link(bpy.data.objects['Sun2'])
+        #
+        # light2 = bpy.data.lights.new("Sun3", type='SUN')
+        # light2.energy = 3
+        # # light2.use_shadow = False
+        # light_obj_2 = bpy.data.objects.new('Sun3', light2)
+        # # location
+        # light_obj_2.location = vec * 2
+        # light_obj_2.location.rotate(Euler((0, radians(15), radians(-45)),'XYZ'))
+        # # rotation
+        # direction = light_obj_2.location - Vector((0, 0, 0))
+        # rot_quat = direction.to_track_quat()
+        # light_obj_2.rotation_euler = rot_quat.to_euler()
+        # light_obj_2.data.cycles.cast_shadow = False
+        # bpy.context.scene.collection.objects.link(bpy.data.objects['Sun3'])
+        #
+        # light3 = bpy.data.lights.new("Sun4", type='SUN')
+        # light3.energy = 3.5
+        # # light3.use_shadow = False
+        # light_obj_3 = bpy.data.objects.new('Sun4', light3)
+        # # location
+        # light_obj_3.location = vec * 4
+        # # fixed z
+        # light_obj_3.location.rotate(Euler((0, radians(30), radians(180)),'XYZ'))
+        # light_obj_3.location[2] = 0.3
+        # # rotation
+        # direction = light_obj_3.location - Vector((0, 0, light_obj_3.location[2]))
+        # rot_quat = direction.to_track_quat()
+        # light_obj_3.rotation_euler = rot_quat.to_euler()
+        # light_obj_3.data.cycles.cast_shadow = False
+        # bpy.context.scene.collection.objects.link(bpy.data.objects['Sun4'])
 
     def build_indirect_light(self):
         world = bpy.context.scene.world
@@ -402,7 +452,7 @@ class RenderCore:
                     or 'Cut Edge Instance' in objects[i].name \
                     or 'Singularity Instance' in objects[i].name \
                     or 'Loops' in objects[i].name \
-                    or 'Singular Faces' in object[i].name:
+                    or 'Singular Faces' in objects[i].name:
                 objects[i].parent = rotation_object
         objects['Mesh'].parent = rotation_object
         rotation_object.rotation_mode = 'XYZ'
@@ -520,7 +570,10 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
-            output_path = path + "/Output/" + self.config.object_name.split(".")[0] + ("_rotation_%03d.png" % (rotation))
+            rotation_path = path + "/Output/" + self.config.scene + "/Rotation/" + self.config.rotation_axis + "/"
+            if not os.path.exists(rotation_path):
+                os.makedirs(rotation_path)
+            output_path = rotation_path + self.config.object_name.split('.')[0] + ("_rotation_%03d.png" % (rotation))
             self.config.output_path = output_path
             # self.renderSingle()
             scene_file = open(self.config.scene_path + self.config.scene_name)
@@ -534,6 +587,45 @@ class RenderCore:
             self.build_ground()
             self.build_camera(scene_json)
             self.build_direct_light()
+
+            # path = os.getcwd()
+            # path = os.path.dirname(path)
+            # path = os.path.dirname(path)
+            # filename = path + "/Data/Materials/predefined/predefined.blend"
+            # with bpy.data.libraries.load(filename) as (src, dst):
+            #     dst.objects = src.objects
+            # light_1 = dst.objects[17]
+            # light_2 = dst.objects[18]
+            # light_3 = dst.objects[19]
+            #
+            # cam_json = scene_json['camera']
+            # cam = dst.objects[23]
+            # cam.location *= 0.8
+            #
+            # center = Vector(self.blender_vec(cam_json['center']))
+            # direction = center - cam.location
+            # rot_quat = direction.to_track_quat('-Z', 'Y')
+            # cam.rotation_euler = rot_quat.to_euler()
+            # # mesh_obj.rotation_euler.rotate_axis("Y", self.rotation)
+            #
+            # grid = dst.objects[20]
+            # number = dst.objects[10]
+            # plane = dst.objects[9]
+            #
+            # zmin = bpy.data.objects['Mesh'].bound_box[0][1]
+            # grid.location[2] = zmin
+            # number.location[2] = zmin
+            # plane.location[2] = zmin
+            #
+            # bpy.context.scene.collection.objects.link(light_1)
+            # bpy.context.scene.collection.objects.link(light_2)
+            # bpy.context.scene.collection.objects.link(light_3)
+            # bpy.context.scene.collection.objects.link(cam)
+            # bpy.context.scene.camera = cam
+            # bpy.context.scene.collection.objects.link(grid)
+            # bpy.context.scene.collection.objects.link(number)
+            # bpy.context.scene.collection.objects.link(plane)
+
             self.build_indirect_light()
             self.build_rotation()
             self.do_render()
@@ -581,56 +673,56 @@ class RenderCore:
         scene.frame_current = 1
         bpy.ops.render.render(animation=True)
 
-    def renderPreDefined(self):
-        path = os.getcwd()
-        path = os.path.dirname(path)
-        path = os.path.dirname(path)
-        filename = path + "/Data/Materials/predefined/predefined.blend"
-
-        scene_file = open(self.config.scene_path + self.config.scene_name)
-        scene_json = json.load(scene_file)
-        self.clean()
-        self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
-        self.build_main_mesh(self.config.scene_path + self.config.object_name)
-        self.build_singularity_primitives()
-        self.build_segment_primitives()
-        self.build_addons(scene_json)
-        self.build_indirect_light()
-
-        with bpy.data.libraries.load(filename) as (src,dst):
-            dst.objects = src.objects
-        light_1 = dst.objects[17]
-        light_2 = dst.objects[18]
-        light_3 = dst.objects[19]
-
-        cam_json = scene_json['camera']
-        cam = dst.objects[23]
-        cam.location *= 0.8
-
-        center = Vector(self.blender_vec(cam_json['center']))
-        direction = center - cam.location
-        rot_quat = direction.to_track_quat('-Z', 'Y')
-        cam.rotation_euler = rot_quat.to_euler()
-        # mesh_obj.rotation_euler.rotate_axis("Y", self.rotation)
-
-        grid = dst.objects[20]
-        number = dst.objects[10]
-        plane = dst.objects[9]
-
-        zmin = bpy.data.objects['Mesh'].bound_box[0][1]
-        grid.location[2] = zmin
-        number.location[2] = zmin
-        plane.location[2] = zmin
-
-        bpy.context.scene.collection.objects.link(light_1)
-        bpy.context.scene.collection.objects.link(light_2)
-        bpy.context.scene.collection.objects.link(light_3)
-        bpy.context.scene.collection.objects.link(cam)
-        bpy.context.scene.camera = cam
-        bpy.context.scene.collection.objects.link(grid)
-        bpy.context.scene.collection.objects.link(number)
-        bpy.context.scene.collection.objects.link(plane)
-        self.do_render()
+    # def renderPreDefined(self):
+    #     path = os.getcwd()
+    #     path = os.path.dirname(path)
+    #     path = os.path.dirname(path)
+    #     filename = path + "/Data/Materials/predefined/predefined.blend"
+    #
+    #     scene_file = open(self.config.scene_path + self.config.scene_name)
+    #     scene_json = json.load(scene_file)
+    #     self.clean()
+    #     self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
+    #     self.build_main_mesh(self.config.scene_path + self.config.object_name)
+    #     self.build_singularity_primitives()
+    #     self.build_segment_primitives()
+    #     self.build_addons(scene_json)
+    #     self.build_indirect_light()
+    #
+    #     with bpy.data.libraries.load(filename) as (src,dst):
+    #         dst.objects = src.objects
+    #     light_1 = dst.objects[17]
+    #     light_2 = dst.objects[18]
+    #     light_3 = dst.objects[19]
+    #
+    #     cam_json = scene_json['camera']
+    #     cam = dst.objects[23]
+    #     cam.location *= 0.8
+    #
+    #     center = Vector(self.blender_vec(cam_json['center']))
+    #     direction = center - cam.location
+    #     rot_quat = direction.to_track_quat('-Z', 'Y')
+    #     cam.rotation_euler = rot_quat.to_euler()
+    #     # mesh_obj.rotation_euler.rotate_axis("Y", self.rotation)
+    #
+    #     grid = dst.objects[20]
+    #     number = dst.objects[10]
+    #     plane = dst.objects[9]
+    #
+    #     zmin = bpy.data.objects['Mesh'].bound_box[0][1]
+    #     grid.location[2] = zmin
+    #     number.location[2] = zmin
+    #     plane.location[2] = zmin
+    #
+    #     bpy.context.scene.collection.objects.link(light_1)
+    #     bpy.context.scene.collection.objects.link(light_2)
+    #     bpy.context.scene.collection.objects.link(light_3)
+    #     bpy.context.scene.collection.objects.link(cam)
+    #     bpy.context.scene.camera = cam
+    #     bpy.context.scene.collection.objects.link(grid)
+    #     bpy.context.scene.collection.objects.link(number)
+    #     bpy.context.scene.collection.objects.link(plane)
+    #     self.do_render()
 
     def render(self):
         if self.config.mode == 'build_only':
@@ -647,8 +739,8 @@ class RenderCore:
             self.renderRotation()
         elif self.config.mode == 'rotation_animation':
             self.renderRotationAnimation()
-        elif self.config.mode == 'predefined':
-            self.renderPreDefined()
+        # elif self.config.mode == 'predefined':
+        #     self.renderPreDefined()
 
 
 
