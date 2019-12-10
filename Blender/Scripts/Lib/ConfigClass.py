@@ -34,7 +34,7 @@ path = os.getcwd()
 path = os.path.dirname(path)
 path = os.path.dirname(path)
 # OUTPUT_PATH = path + "\Output\\" +  scene_name.split(".")[0]+ ".png"
-OUTPUT_PATH = path + "\Output\\" + object_name.split(".")[0] + ".png"
+OUTPUT_PATH = path + "/Output/" + object_name.split(".")[0] + ".png"
 
 WIDTH = 2000
 HEIGHT = 1500

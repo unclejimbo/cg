@@ -31,7 +31,7 @@ class Strebel:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        dir = path + "\\Output\\Strebel\\"
+        dir = path + "/Output/Strebel/"
         self.output_path = dir
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -154,7 +154,7 @@ class Strebel:
         path = self.output_path + "checkerboard_v1"
         if not os.path.exists(path):
             os.makedirs(path)
-        image.save(self.output_path + "checkerboard_v1\\checkerboard_v1_" + self.checkerboard_colors[0] +
+        image.save(self.output_path + "checkerboard_v1/checkerboard_v1_" + self.checkerboard_colors[0] +
                    "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
         return image
 
@@ -186,7 +186,7 @@ class Strebel:
         if not os.path.exists(path):
             os.makedirs(path)
 
-        image.save(self.output_path + "checkerboard_v2\\checkerboard_v2_" + self.checkerboard_colors[0] +
+        image.save(self.output_path + "checkerboard_v2/checkerboard_v2_" + self.checkerboard_colors[0] +
                    "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
         return image
 
@@ -225,7 +225,7 @@ class Strebel:
         path = self.output_path + "circle_v1"
         if not os.path.exists(path):
             os.makedirs(path)
-        image.save(self.output_path + "circle_v1\\circle_v1_" + self.circle_color + "_" + self.image_color + '.png')
+        image.save(self.output_path + "circle_v1/circle_v1_" + self.circle_color + "_" + self.image_color + '.png')
         return image
 
     def CircleV2(self):
@@ -248,7 +248,7 @@ class Strebel:
         path = self.output_path + "circle_v2"
         if not os.path.exists(path):
             os.makedirs(path)
-        image.save(self.output_path + "circle_v2\\circle_v2_" + self.circle_color + "_" + self.image_color + '.png')
+        image.save(self.output_path + "circle_v2/circle_v2_" + self.circle_color + "_" + self.image_color + '.png')
         return image
 
     def LinesBasicX(self, draw):
@@ -308,7 +308,7 @@ class Strebel:
         path = self.output_path + "lines_xy"
         if not os.path.exists(path):
             os.makedirs(path)
-        image.save(self.output_path + "lines_xy\\linesxy_" + str(file_number) + ".png")
+        image.save(self.output_path + "lines_xy/linesxy_" + str(file_number) + ".png")
         return image
 
     def rgba2hex(self, color):

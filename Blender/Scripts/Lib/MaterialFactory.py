@@ -498,7 +498,7 @@ class MaterialFactory:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        filename = path + "\\Data\\Materials\\" + self.material_filename
+        filename = path + "/Data/Materials/" + self.material_filename
         with bpy.data.libraries.load(filename, link=True) as (src, dst):
             dst.materials = src.materials
         return dst.materials[0]

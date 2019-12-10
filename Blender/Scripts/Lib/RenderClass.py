@@ -461,7 +461,7 @@ class RenderCore:
                 path = os.getcwd()
                 path = os.path.dirname(path)
                 path = os.path.dirname(path)
-                output_path = path + "\Output\\" + scene_list[i].split(".")[0] + ".png"
+                output_path = path + "/Output/" + scene_list[i].split(".")[0] + ".png"
 
                 self.config.object_name = obj_list[i]
                 self.config.scene_name = scene_list[i]
@@ -492,7 +492,7 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
-            output_path = path + "\Output\\" + obj_list[i].split(".")[0] + ".png"
+            output_path = path + "/Output/" + obj_list[i].split(".")[0] + ".png"
             self.config.output_path = output_path
             self.config.object_name = obj_list[i]
             self.renderSingle()
@@ -508,7 +508,7 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
-            output_path = path + "\Output\\" + self.config.object_name.split(".")[0] + "_" + material + ".png"
+            output_path = path + "/Output/" + self.config.object_name.split(".")[0] + "_" + material + ".png"
             self.config.output_path = output_path
             self.renderSingle()
 
@@ -520,7 +520,7 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
-            output_path = path + "\Output\\" + self.config.object_name.split(".")[0] + ("_rotation_%03d.png" % (rotation))
+            output_path = path + "/Output/" + self.config.object_name.split(".")[0] + ("_rotation_%03d.png" % (rotation))
             self.config.output_path = output_path
             # self.renderSingle()
             scene_file = open(self.config.scene_path + self.config.scene_name)
@@ -542,7 +542,7 @@ class RenderCore:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        output_path = path + "\Output\\" + self.config.object_name.split(".")[0] + "_rotation.avi"
+        output_path = path + "/Output/" + self.config.object_name.split(".")[0] + "_rotation.avi"
         self.config.output_path = output_path
 
         scene_file = open(self.config.scene_path + self.config.scene_name)
@@ -585,7 +585,7 @@ class RenderCore:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        filename = path + "\\Data\\Materials\\predefined\\predefined.blend"
+        filename = path + "/Data/Materials/predefined/predefined.blend"
 
         scene_file = open(self.config.scene_path + self.config.scene_name)
         scene_json = json.load(scene_file)

@@ -10,24 +10,24 @@ class TaskImageVideo():
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        self.ImageInput = path + "\Output\\"
-        self.PngPath = self.ImageInput + "Png\\"
-        self.JpgPath = self.ImageInput + "Jpg\\"
-        self.CropPath = self.ImageInput + "Crop\\"
-        self.VideoOutput = self.ImageInput + "video\\"
+        self.ImageInput = path + "/Output/"
+        self.PngPath = self.ImageInput + "Png/"
+        self.JpgPath = self.ImageInput + "Jpg/"
+        self.CropPath = self.ImageInput + "Crop/"
+        self.VideoOutput = self.ImageInput + "video/"
         # self.PngPath = path + "\Output\\Png\\"
         # self.JpgPath = path + "\Output\\Jpg\\"
         # self.CropPath = path + "\Output\\Crop\\"
         # self.VideoOutput = path + "\Output\\video\\"
 
         self.VideoName = 'result'
-        self.ffmpegPath = 'D:\\FFmpeg\\ffmpeg\\bin\\ffmpeg.exe'
+        self.ffmpegPath = 'D://FFmpeg/ffmpeg/bin/ffmpeg.exe'
         self.framerate = 2
         self.pixel_format = "yuv420p"
         self.input_format = "image_%03d.jpg"
 
     def Rename(self):
-        self.PngPath = self.ImageInput + "Png\\"
+        self.PngPath = self.ImageInput + "Png/"
         if not os.path.exists(self.PngPath):
             os.makedirs(self.PngPath)
 
@@ -45,8 +45,8 @@ class TaskImageVideo():
     #                 os.rename(self.ImageInput+filename, output_name)
 
     def PreProcessing(self):
-        self.JpgPath = self.ImageInput + "Jpg\\"
-        self.CropPath = self.ImageInput + "Crop\\"
+        self.JpgPath = self.ImageInput + "Jpg/"
+        self.CropPath = self.ImageInput + "Crop/"
         if not os.path.exists(self.JpgPath):
             os.makedirs(self.JpgPath)
         if not os.path.exists(self.CropPath):
@@ -68,8 +68,8 @@ class TaskImageVideo():
                 img_rgb.save(output_name)
 
     def CropImage(self):
-        self.JpgPath = self.ImageInput + "Jpg\\"
-        self.CropPath = self.ImageInput + "Crop\\"
+        self.JpgPath = self.ImageInput + "Jpg/"
+        self.CropPath = self.ImageInput + "Crop/"
         if not os.path.exists(self.JpgPath):
             os.makedirs(self.JpgPath)
         if not os.path.exists(self.CropPath):
@@ -95,7 +95,7 @@ class TaskImageVideo():
             cv2.imwrite(self.CropPath + filename, dst)
 
     def ProduceVideo(self):
-        self.VideoOutput = self.ImageInput + "video\\"
+        self.VideoOutput = self.ImageInput + "video/"
         if not os.path.exists(self.VideoOutput):
             os.makedirs(self.VideoOutput)
 
