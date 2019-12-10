@@ -45,12 +45,23 @@ class MaterialFactory:
         img_node.image = bpy.data.images.load(filepath=self.texture_path)
         # rgb_node = mat.node_tree.nodes.new(type='ShaderNodeRGB')
         # rgb_node.outputs['Color'].default_value = (0.8, 0.8, 0.8, 1.0)
-
         bsdf_node = mat.node_tree.nodes['Principled BSDF']
         bsdf_node.inputs['Roughness'].default_value = self.roughness
         bsdf_node.inputs['Specular'].default_value = self.specular
         mat.node_tree.links.new(
             img_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+        return mat
+
+    def CreateColorOnly(self):
+        mat = bpy.data.materials.new('Main')
+        mat.use_nodes = True
+        rgb_node = mat.node_tree.nodes.new(type='ShaderNodeRGB')
+        rgb_node.outputs['Color'].default_value = (0.8, 0.8, 0.8, 1.0)
+        bsdf_node = mat.node_tree.nodes['Principled BSDF']
+        bsdf_node.inputs['Roughness'].default_value = self.roughness
+        bsdf_node.inputs['Specular'].default_value = self.specular
+        mat.node_tree.links.new(
+            rgb_node.outputs['Color'], bsdf_node.inputs['Base Color'])
         return mat
 
     def CreateVertexColor(self):

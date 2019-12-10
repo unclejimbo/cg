@@ -5,6 +5,7 @@ import math
 from PIL import ImagePath, ImageFont
 import os
 import sys
+import shutil
 
 
 class Strebel:
@@ -150,7 +151,10 @@ class Strebel:
                 color = colors[(i + j) % 2]
                 corners = [width * i, width * j, width * (i + 1), width * (j + 1)]
                 draw.rectangle(corners, fill=color)
-        image.save(self.output_path + "checkerboard_v1_" + self.checkerboard_colors[0] +
+        path = self.output_path + "checkerboard_v1"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        image.save(self.output_path + "checkerboard_v1\\checkerboard_v1_" + self.checkerboard_colors[0] +
                    "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
         return image
 
@@ -158,13 +162,31 @@ class Strebel:
         size = self.size
         colorsLine = self.checkerboard_linecolors
         widthline = self.checkerboard_linewidth
-        image = self.CheckerboardV1()
+
+        colors = self.checkerboard_colors
+
+        image = Image.new("RGB", (self.size, self.size))
+        draw = ImageDraw.Draw(image)
+
+        width = self.size / self.number
+
+        for i in range(self.number):
+            for j in range(self.number):
+                color = colors[(i + j) % 2]
+                corners = [width * i, width * j, width * (i + 1), width * (j + 1)]
+                draw.rectangle(corners, fill=color)
+
         draw = ImageDraw.Draw(image)
         draw.line([(0, 0), (0, size - 1)], fill=colorsLine[0], width=widthline)
         draw.line([(size - 1, 0), (size - 1, size - 1)], fill=colorsLine[1], width=widthline)
         draw.line([(0, 0), (size - 1, 0)], fill=colorsLine[2], width=widthline)
         draw.line([(0, size - 1), (size - 1, size - 1)], fill=colorsLine[3], width=widthline)
-        image.save(self.output_path + "checkerboard_v2_" + self.checkerboard_colors[0] +
+
+        path = self.output_path + "checkerboard_v2"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        image.save(self.output_path + "checkerboard_v2\\checkerboard_v2_" + self.checkerboard_colors[0] +
                    "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
         return image
 
@@ -199,7 +221,11 @@ class Strebel:
 
         draw.line([(0, 0), (0, size - 1)], fill="red", width=1)
         draw.line([(size - 1, 0), (size - 1, size - 1)], fill="red", width=1)
-        image.save(self.output_path + "circle_v1_" + self.circle_color + "_" + self.image_color + '.png')
+
+        path = self.output_path + "circle_v1"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        image.save(self.output_path + "circle_v1\\circle_v1_" + self.circle_color + "_" + self.image_color + '.png')
         return image
 
     def CircleV2(self):
@@ -218,7 +244,11 @@ class Strebel:
 
         draw.line([(0, 0), (0, size - 1)], fill="red", width=1)
         draw.line([(size - 1, 0), (size - 1, size - 1)], fill="red", width=1)
-        image.save(self.output_path + "circle_v2_" + self.circle_color + "_" + self.image_color + '.png')
+
+        path = self.output_path + "circle_v2"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        image.save(self.output_path + "circle_v2\\circle_v2_" + self.circle_color + "_" + self.image_color + '.png')
         return image
 
     def LinesBasicX(self, draw):
@@ -274,7 +304,11 @@ class Strebel:
         draw = ImageDraw.Draw(image)
         self.LinesBasicX(draw)
         self.LinesBasicY(draw)
-        image.save(self.output_path + "linesxy_" + str(file_number) + ".png")
+
+        path = self.output_path + "lines_xy"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        image.save(self.output_path + "lines_xy\\linesxy_" + str(file_number) + ".png")
         return image
 
     def rgba2hex(self, color):
