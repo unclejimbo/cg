@@ -3,7 +3,7 @@ import sys
 sys.path.append("..")
 from PIL import Image
 import cv2
-
+import imageio
 
 class TaskImageVideo():
     def __init__(self):
@@ -109,6 +109,21 @@ class TaskImageVideo():
               " -pix_fmt " + self.pixel_format + " " + self.VideoOutput + self.VideoName + ".mp4"
         os.system(cmd)
         print("write done")
+
+    def ProduceVideo_2(self):
+        self.VideoOutput = self.ImageInput + "video/"
+        if not os.path.exists(self.VideoOutput):
+            os.makedirs(self.VideoOutput)
+        video_path = self.VideoOutput + self.VideoName + ".mp4"
+        writer = imageio.get_writer(video_path, mode="I", fps=self.framerate)
+        f_list = os.listdir(self.PngPath)
+        for i in range(len(f_list)):
+            filename = self.PngPath + "/image_%03d"%(i) + ".png"
+            writer.append_data(imageio.imread(filename))
+        writer.close()
+        print("write done")
+
+
 
 
 # if __name__ == '__main__':
