@@ -61,11 +61,11 @@ class TaskImageVideo():
                 # rename
                 output_name = self.JpgPath + os.path.splitext(filename)[0] + '.jpg'
                 # conver to jpg
-                # img_rgb = Image.new("RGB", img.size, (255, 255, 255))
-                # img_rgb.paste(img, mask=img.split()[3])
-                # img_rgb.save(output_name)
-                img_rgb = img.convert('RGB')
+                img_rgb = Image.new("RGB", img.size, (255, 255, 255))
+                img_rgb.paste(img, mask=img.split()[3])
                 img_rgb.save(output_name)
+                # img_rgb = img.convert('RGB')
+                # img_rgb.save(output_name)
 
     def CropImage(self):
         self.JpgPath = self.ImageInput + "Jpg/"
@@ -116,15 +116,12 @@ class TaskImageVideo():
             os.makedirs(self.VideoOutput)
         video_path = self.VideoOutput + self.VideoName + ".mp4"
         writer = imageio.get_writer(video_path, mode="I", fps=self.framerate)
-        f_list = os.listdir(self.PngPath)
+        f_list = os.listdir(self.JpgPath)
         for i in range(len(f_list)):
-            filename = self.PngPath + "/image_%03d"%(i) + ".png"
+            filename = self.JpgPath + "/image_%03d"%(i) + ".jpg"
             writer.append_data(imageio.imread(filename))
         writer.close()
         print("write done")
-
-
-
 
 # if __name__ == '__main__':
 #     task = TaskImageVideo()
