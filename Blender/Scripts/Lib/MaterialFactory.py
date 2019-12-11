@@ -56,7 +56,8 @@ class MaterialFactory:
         mat = bpy.data.materials.new('Main')
         mat.use_nodes = True
         rgb_node = mat.node_tree.nodes.new(type='ShaderNodeRGB')
-        rgb_node.outputs['Color'].default_value = (0.8, 0.8, 0.8, 1.0)
+        # rgb_node.outputs['Color'].default_value = (0.8, 0.8, 0.8, 1.0)
+        rgb_node.outputs['Color'].default_value = self.model_color
         bsdf_node = mat.node_tree.nodes['Principled BSDF']
         bsdf_node.inputs['Roughness'].default_value = self.roughness
         bsdf_node.inputs['Specular'].default_value = self.specular

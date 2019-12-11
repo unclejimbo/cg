@@ -299,11 +299,14 @@ class RenderCore:
             grid = dst.objects[20]
             number = dst.objects[10]
             plane = dst.objects[9]
-            # zmin = bpy.data.objects['Mesh'].bound_box[0][1]
-            zmin = -2
+            zmin = bpy.data.objects['Mesh'].bound_box[0][1]
             grid.location[2] = zmin
             number.location[2] = zmin
             plane.location[2] = zmin
+
+            plane.scale[0] = 10
+            plane.scale[1] = 10
+
             bpy.context.scene.collection.objects.link(grid)
             bpy.context.scene.collection.objects.link(number)
             bpy.context.scene.collection.objects.link(plane)
@@ -340,6 +343,10 @@ class RenderCore:
         light_1 = dst.objects[17]
         light_2 = dst.objects[18]
         light_3 = dst.objects[19]
+
+        bpy.data.materials["X-Lights.006"].node_tree.nodes["Emission"].inputs[1].default_value = 12
+        bpy.data.materials["X-Lights.008"].node_tree.nodes["Emission"].inputs[1].default_value = 18.4
+        bpy.data.materials["X-Lights.007"].node_tree.nodes["Emission"].inputs[1].default_value = 9
 
         bpy.context.scene.collection.objects.link(light_1)
         bpy.context.scene.collection.objects.link(light_2)
