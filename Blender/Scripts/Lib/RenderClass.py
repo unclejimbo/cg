@@ -65,10 +65,11 @@ class RenderCore:
         tree.links.new(render_node.outputs['Image'], originoutput_node.inputs[0])
 
     def choose_material(self):
-        material_list = ['color_only', 'original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
+        material_list = ['model_only', 'color_only', 'original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
                         'peeling_paint', 'paint', 'vertex_color', 'wireframe_only']
         if self.config.material in material_list and self.config.material_filename is None:
             material_function = {
+                'model_only' : self.MaterialFactory.CreateModelOnly(),
                 'color_only': self.MaterialFactory.CreateColorOnly(),
                 'original': self.MaterialFactory.CreateMain(),
                 'gold': self.MaterialFactory.CreateGold(),

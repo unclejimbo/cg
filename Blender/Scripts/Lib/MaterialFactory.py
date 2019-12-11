@@ -65,6 +65,15 @@ class MaterialFactory:
             rgb_node.outputs['Color'], bsdf_node.inputs['Base Color'])
         return mat
 
+    def CreateModelOnly(self):
+        path = os.getcwd()
+        path = os.path.dirname(path)
+        path = os.path.dirname(path)
+        filename = path + "/Data/Materials/" + "55-tomato-material-modified.blend"
+        with bpy.data.libraries.load(filename, link=True) as (src, dst):
+            dst.materials = src.materials
+        return dst.materials[0]
+
     def CreateVertexColor(self):
         mat = bpy.data.materials.new('Material Vertex Color')
         mat.use_nodes = True
