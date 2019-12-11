@@ -340,18 +340,24 @@ class RenderCore:
         filename = path + "/Data/Materials/predefined/predefined.blend"
         with bpy.data.libraries.load(filename) as (src,dst):
             dst.objects = src.objects
+            dst.materials = src.materials
 
         light_1 = dst.objects[17]
         light_2 = dst.objects[18]
         light_3 = dst.objects[19]
 
-        bpy.data.materials["X-Lights.006"].node_tree.nodes["Emission"].inputs[1].default_value = 12
-        bpy.data.materials["X-Lights.008"].node_tree.nodes["Emission"].inputs[1].default_value = 18.4
-        bpy.data.materials["X-Lights.007"].node_tree.nodes["Emission"].inputs[1].default_value = 9
+        # bpy.data.materials["X-Lights.006"].node_tree.nodes["Emission"].inputs[1].default_value = 12
+        # bpy.data.materials["X-Lights.008"].node_tree.nodes["Emission"].inputs[1].default_value = 18.4
+        # bpy.data.materials["X-Lights.007"].node_tree.nodes["Emission"].inputs[1].default_value = 9
+        light_1.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 12
+        light_2.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 9
+        light_3.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 18.4
 
         bpy.context.scene.collection.objects.link(light_1)
         bpy.context.scene.collection.objects.link(light_2)
         bpy.context.scene.collection.objects.link(light_3)
+
+
 
     def build_indirect_light(self):
         world = bpy.context.scene.world
