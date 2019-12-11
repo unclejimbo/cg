@@ -13,7 +13,7 @@ segment_colors = [0x800000, 0xD2691E, 0x808000, 0x008080, 0x000080,
 
 
 data_path = os.path.dirname(os.path.abspath(__file__)) + '/../../Data/'
-texture_path = data_path + 'Texture/checkerboard.png'
+texture_path = data_path + 'Texture/checkerboard_yellow.png'
 envmap_path = data_path + 'HDR/gl-hdr-02.hdr'
 
 # envmap_path = data_path + 'HDR/green_point_park_2k.hdr'
