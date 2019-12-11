@@ -85,7 +85,7 @@ class Config:
                  use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size,
                  material_filename = material_filename, wireframe_color = wireframe_color, scene = scene,
                  singularity_material = singularity_material, edge_material = edge_material, model_color = model_color,
-                 loop_material = loop_material):
+                 loop_material = loop_material, singular_face_material = singular_face_material):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -125,6 +125,7 @@ class Config:
         self.edge_material = edge_material
         self.model_color = model_color
         self.loop_material = loop_material
+        self.singular_face_material = singular_face_material
 
     def save_config(self):
         config_dict = {}
@@ -167,6 +168,7 @@ class Config:
         config_dict['edge_material'] = self.edge_material
         config_dict['model_color'] = self.model_color
         config_dict['loop_material'] = self.loop_material
+        config_dict['singular_face_material'] = self.singular_face_material
 
         with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)
