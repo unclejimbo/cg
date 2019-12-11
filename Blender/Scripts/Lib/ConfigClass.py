@@ -49,7 +49,7 @@ material = "original"
 edge_scale = 0.002
 edge_material = None
 
-singularity_scale = 0.015
+singularity_scale = 0.010
 singularity_material = "75-phone-screen.blend"
 singular_face_material = None
 loop_material = None
