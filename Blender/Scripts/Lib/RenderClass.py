@@ -320,7 +320,7 @@ class RenderCore:
         cam.location *= 0.8
 
         # center = Vector(self.blender_vec(cam_json['center']))
-        center = Vector(0, 0, 0)
+        center = Vector((0, 0, 0))
         direction = center - cam.location
         rot_quat = direction.to_track_quat('-Z', 'Y')
         cam.rotation_euler = rot_quat.to_euler()
