@@ -100,13 +100,13 @@ class TaskImageVideo():
             os.makedirs(self.VideoOutput)
 
         ### ProduceVideo ###
-        # cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
-        #       self.JpgPath + self.input_format + " -c:v libx264" + \
-        #       " -pix_fmt " + self.pixel_format + " " + self.VideoOutput + self.VideoName + ".mp4"
-
         cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
-              self.JpgPath + self.input_format + \
+              self.JpgPath + self.input_format + " -c:v libx264" + \
               " -pix_fmt " + self.pixel_format + " " + self.VideoOutput + self.VideoName + ".mp4"
+
+        # cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
+        #       self.JpgPath + self.input_format + \
+        #       " -pix_fmt " + self.pixel_format + " " + self.VideoOutput + self.VideoName + ".mp4"
         os.system(cmd)
         print("write done")
 
@@ -118,15 +118,8 @@ class TaskImageVideo():
         writer = imageio.get_writer(video_path, mode="I", fps=self.framerate)
         f_list = os.listdir(self.JpgPath)
         for i in range(len(f_list)):
-            filename = self.JpgPath + "/image_%03d"%(i) + ".jpg"
+            filename = self.JpgPath + "/" + self.input_format%(i)
             writer.append_data(imageio.imread(filename))
         writer.close()
         print("write done")
 
-# if __name__ == '__main__':
-#     task = TaskImageVideo()
-#     task.framerate = 0.5
-#     task.Rename()
-#     task.PreProcessing()
-#     task.CropImage()
-#     task.ProduceVideo()

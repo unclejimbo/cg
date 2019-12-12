@@ -158,6 +158,27 @@ class Strebel:
                    "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
         return image
 
+    def CheckerboardV1_white(self):
+        colors = self.checkerboard_colors
+        colors[1] = "#ffffff"
+
+        image = Image.new("RGB", (self.size, self.size))
+        draw = ImageDraw.Draw(image)
+
+        width = self.size / self.number
+
+        for i in range(self.number):
+            for j in range(self.number):
+                color = colors[(i + j) % 2]
+                corners = [width * i, width * j, width * (i + 1), width * (j + 1)]
+                draw.rectangle(corners, fill=color)
+        path = self.output_path + "checkerboard_v1_white"
+        if not os.path.exists(path):
+            os.makedirs(path)
+        image.save(self.output_path + "checkerboard_v1_white/checkerboard_v1_" + self.checkerboard_colors[0] +
+                   "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
+        return image
+
     def CheckerboardV2(self):
         size = self.size
         colorsLine = self.checkerboard_linecolors
@@ -189,6 +210,40 @@ class Strebel:
         image.save(self.output_path + "checkerboard_v2/checkerboard_v2_" + self.checkerboard_colors[0] +
                    "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
         return image
+
+    def CheckerboardV2_white(self):
+        size = self.size
+        colorsLine = self.checkerboard_linecolors
+        widthline = self.checkerboard_linewidth
+
+        colors = self.checkerboard_colors
+        colors[1] = "#ffffff"
+
+        image = Image.new("RGB", (self.size, self.size))
+        draw = ImageDraw.Draw(image)
+
+        width = self.size / self.number
+
+        for i in range(self.number):
+            for j in range(self.number):
+                color = colors[(i + j) % 2]
+                corners = [width * i, width * j, width * (i + 1), width * (j + 1)]
+                draw.rectangle(corners, fill=color)
+
+        draw = ImageDraw.Draw(image)
+        draw.line([(0, 0), (0, size - 1)], fill=colorsLine[0], width=widthline)
+        draw.line([(size - 1, 0), (size - 1, size - 1)], fill=colorsLine[1], width=widthline)
+        draw.line([(0, 0), (size - 1, 0)], fill=colorsLine[2], width=widthline)
+        draw.line([(0, size - 1), (size - 1, size - 1)], fill=colorsLine[3], width=widthline)
+
+        path = self.output_path + "checkerboard_v2_white"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        image.save(self.output_path + "checkerboard_v2_white/checkerboard_v2_" + self.checkerboard_colors[0] +
+                   "_" + self.checkerboard_colors[1] + "_" + str(self.number) + '.png')
+        return image
+
 
     def DrawCriticalLineXV2(self, draw):
         draw.line([(0, 0), (0, self.size - 1)], fill=self.critical_line_color_x, width=self.line_width)

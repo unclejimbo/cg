@@ -22,6 +22,9 @@ blender_path = "D:/tools/blender_2.81/blender.exe"
 background_render = False
 SCENE_PATH = "../../Scene/eight/"
 scene_name = "scene.json"
+cut_json_name = "cuts.json"
+singularity_json_name = "singularities.json"
+
 scene = "eight"
 object_name = "mesh.obj"
 
@@ -85,7 +88,8 @@ class Config:
                  use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size,
                  material_filename = material_filename, wireframe_color = wireframe_color, scene = scene,
                  singularity_material = singularity_material, edge_material = edge_material, model_color = model_color,
-                 loop_material = loop_material, singular_face_material = singular_face_material):
+                 loop_material = loop_material, singular_face_material = singular_face_material, cut_json_name = cut_json_name,
+                 singularity_json_name = singularity_json_name):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -126,6 +130,8 @@ class Config:
         self.model_color = model_color
         self.loop_material = loop_material
         self.singular_face_material = singular_face_material
+        self.cut_json_name = cut_json_name
+        self.singularity_json_name = singularity_json_name
 
     def save_config(self):
         config_dict = {}
@@ -169,6 +175,8 @@ class Config:
         config_dict['model_color'] = self.model_color
         config_dict['loop_material'] = self.loop_material
         config_dict['singular_face_material'] = self.singular_face_material
+        config_dict['cut_json_name'] = self.cut_json_name
+        config_dict['singularity_json_name'] = self.singularity_json_name
 
         with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)

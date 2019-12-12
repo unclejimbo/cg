@@ -20,6 +20,8 @@ class RenderCore:
         self.MaterialFactory.wireframe_color = self.config.wireframe_color
         self.MaterialFactory.model_color = self.config.model_color
         self.rotation = 0
+        self.singularity_json = None
+        self.cut_json = None
 
     def blender_vec(self, vec):
         return (vec[0], -vec[2], vec[1])
@@ -29,6 +31,25 @@ class RenderCore:
         g = ((h >> 8) & 0xFF) / 255.0
         r = ((h >> 16) & 0xFF) / 255.0
         return r, g, b, 1.0
+
+    def load_json(self):
+        scene_json_path = self.config.scene_path + self.config.scene_name
+        cut_json_path = self.config.scene_path + self.config.cut_json_name
+        singularity_json_path = self.config.scene_path + self.config.singularity_json_name
+        if os.path.exists(scene_json_path):
+            scene_file = open(scene_json_path)
+            scene_json = json.load(scene_file)
+            # load sinularities and cuts
+            self.singularity_json = scene_json['singularities']
+            self.cut_json = scene_json['cuts']
+        if os.path.exists(cut_json_path):
+            cut_file = open(cut_json_path)
+            cut_json = json.load(cut_file)
+            self.cut_json = cut_json['cuts']
+        if os.path.exists(singularity_json_path):
+            singularity_file = open(singularity_json_path)
+            singularity_json = json.load(singularity_file)
+            self.singularity_json = singularity_json['singularities']
 
     def clean(self):
         for item in bpy.data.collections:
@@ -173,6 +194,7 @@ class RenderCore:
 
     def build_segment_primitives(self):
         scene_collection = bpy.context.scene.collection
+
         for i, color in enumerate(self.config.segment_colors):
             if self.config.cut_mode == "Plain":
                 color = 0x808080
@@ -185,11 +207,6 @@ class RenderCore:
                 self.MaterialFactory.material_filename = self.config.edge_material
                 mat = self.MaterialFactory.CreateFromFile()
                 self.MaterialFactory.material_filename = tmp
-
-            # tmp = self.config.material_filename
-            # self.MaterialFactory.material_filename = "16-ruby.blend"
-            # mat = self.MaterialFactory.CreateFromFile()
-            # self.MaterialFactory.material_filename = tmp
 
             bpy.ops.mesh.primitive_cylinder_add()
             cylinder = bpy.data.objects['Cylinder']
@@ -209,11 +226,13 @@ class RenderCore:
             vertex_collection.objects.link(sphere)
             scene_collection.objects.unlink(sphere)
 
-    def build_addons(self, scene_json):
+    def build_addons(self):
         scene_collection = bpy.context.scene.collection
         singularities_collection = bpy.data.collections.new('Singularities')
         scene_collection.children.link(singularities_collection)
-        for i, s in enumerate(scene_json['singularities']):
+
+        # for i, s in enumerate(scene_json['singularities']):
+        for i, s in enumerate(self.singularity_json):
             instance = bpy.data.objects.new('Singularity Instance ' + str(i), None)
             instance.location = self.blender_vec(s['position'])
             instance.scale = (self.config.singularity_scale, self.config.singularity_scale, self.config.singularity_scale)
@@ -224,7 +243,8 @@ class RenderCore:
 
         cuts_collection = bpy.data.collections.new('Cuts')
         scene_collection.children.link(cuts_collection)
-        for i, c in enumerate(scene_json['cuts']):
+        # for i, c in enumerate(scene_json['cuts']):
+        for i, c in enumerate(self.cut_json):
             seg = c['segment'] % 20
             p0 = mathutils.Vector(self.blender_vec(c['points'][0]))
             p1 = mathutils.Vector(self.blender_vec(c['points'][1]))
@@ -236,9 +256,15 @@ class RenderCore:
             edge_instance.rotation_quaternion = mathutils.Vector(
                 (0, 0, 1)).rotation_difference(p0 - p1)
             edge_instance.instance_type = 'COLLECTION'
-            edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(seg)]
-            # if self.config.show_cut == True:
-            #     cuts_collection.objects.link(edge_instance)
+
+            if self.config.cut_mode == "Segment":
+                edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(seg)]
+            elif self.config.cut_mode == "zero_mode":
+                if c['zeroConnected'] == False:
+                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 14']
+                elif c['zeroConnected'] == True:
+                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 5']
+
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(edge_instance)
 
@@ -246,22 +272,49 @@ class RenderCore:
             vertex_instance.location = p0
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            # if self.config.show_cut == True:
-            #     cuts_collection.objects.link(vertex_instance)
+            # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
+            if self.config.cut_mode == "Segment":
+                vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
+            elif self.config.cut_mode == "zero_mode":
+                if c['zeroConnected'] == False:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                elif c['zeroConnected'] == True:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 5']
+
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
             vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2 + 1), None)
             vertex_instance.location = p1
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            # if self.config.show_cut == True:
-            #     cuts_collection.objects.link(vertex_instance)
+            # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
+            if self.config.cut_mode == "Segment":
+                vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
+            elif self.config.cut_mode == "zero_mode":
+                if c['zeroConnected'] == False:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                elif c['zeroConnected'] == True:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 5']
+
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
 
+    def build_parent_object(self):
+        objects = bpy.data.objects
+        parent_object = bpy.data.objects.new("Parent Object", None)
+        bpy.context.scene.collection.objects.link(parent_object)
+        for i in range(0, len(objects)):
+            if 'Cut Vertex Instance' in objects[i].name \
+                    or 'Cut Edge Instance' in objects[i].name \
+                    or 'Singularity Instance' in objects[i].name \
+                    or 'Loops' in objects[i].name \
+                    or 'Singular Faces' in objects[i].name:
+                objects[i].parent = parent_object
+        objects['Mesh'].parent = parent_object
+
     def build_ground(self):
+        objects = bpy.data.objects
+        parent_object = objects["Parent Object"]
         if self.config.plane == "original":
             bpy.ops.mesh.primitive_plane_add(size=50)
             zmin = bpy.data.objects['Mesh'].bound_box[0][1]
@@ -300,10 +353,15 @@ class RenderCore:
             grid = dst.objects[20]
             number = dst.objects[10]
             plane = dst.objects[9]
-            zmin = bpy.data.objects['Mesh'].bound_box[0][1]
-            grid.location[2] = zmin
-            number.location[2] = zmin
-            plane.location[2] = zmin
+            # zmin = bpy.data.objects['Mesh'].bound_box[0][1]
+
+            z_offset = -0.5
+            parent_object.location[2] -= objects['Mesh'].bound_box[0][1]
+            parent_object.location[2] += z_offset
+
+            grid.location[2] = z_offset
+            number.location[2] = z_offset
+            plane.location[2] = z_offset
 
             plane.scale[0] = 10
             plane.scale[1] = 10
@@ -312,7 +370,7 @@ class RenderCore:
             bpy.context.scene.collection.objects.link(number)
             bpy.context.scene.collection.objects.link(plane)
 
-    def build_camera(self, scene_json):
+    def build_camera(self):
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
@@ -320,7 +378,6 @@ class RenderCore:
         with bpy.data.libraries.load(filename) as (src,dst):
             dst.objects = src.objects
 
-        cam_json = scene_json['camera']
         cam = dst.objects[23]
         cam.location *= 0.8
 
@@ -346,18 +403,13 @@ class RenderCore:
         light_2 = dst.objects[18]
         light_3 = dst.objects[19]
 
-        # bpy.data.materials["X-Lights.006"].node_tree.nodes["Emission"].inputs[1].default_value = 12
-        # bpy.data.materials["X-Lights.008"].node_tree.nodes["Emission"].inputs[1].default_value = 18.4
-        # bpy.data.materials["X-Lights.007"].node_tree.nodes["Emission"].inputs[1].default_value = 9
-        light_1.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 12
-        light_2.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 9
-        light_3.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 18.4
+        light_1.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 17
+        light_2.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 14
+        light_3.active_material.node_tree.nodes["Emission"].inputs[1].default_value = 23.4
 
         bpy.context.scene.collection.objects.link(light_1)
         bpy.context.scene.collection.objects.link(light_2)
         bpy.context.scene.collection.objects.link(light_3)
-
-
 
     def build_indirect_light(self):
         world = bpy.context.scene.world
@@ -374,51 +426,30 @@ class RenderCore:
 
     def build_rotation(self):
         objects = bpy.data.objects
-        # rotation_object = bpy.ops.object.empty_add(type='SPHERE')
-        rotation_object = bpy.data.objects.new("empty", None)
-        bpy.context.scene.collection.objects.link(rotation_object)
-        for i in range(0, len(objects)):
-            if 'Cut Vertex Instance' in objects[i].name \
-                    or 'Cut Edge Instance' in objects[i].name \
-                    or 'Singularity Instance' in objects[i].name \
-                    or 'Loops' in objects[i].name \
-                    or 'Singular Faces' in objects[i].name:
-                objects[i].parent = rotation_object
-        objects['Mesh'].parent = rotation_object
-        rotation_object.rotation_mode = 'XYZ'
+        parent_object = objects["Parent Object"]
+        parent_object.rotation_mode = 'XYZ'
         # rotation_object.rotation_euler.rotate_axis("Z", radians(self.rotation))
-        rotation_object.rotation_euler.rotate_axis(self.config.rotation_axis, radians(self.rotation))
+        parent_object.rotation_euler.rotate_axis(self.config.rotation_axis, radians(self.rotation))
 
     def do_render(self):
         bpy.ops.render.render(write_still=True)
 
     def buildOnly(self):
-        scene_file = open(self.config.scene_path + self.config.scene_name)
-        scene_json = json.load(scene_file)
+        self.load_json()
         self.clean()
         self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
         self.build_main_mesh(self.config.scene_path + self.config.object_name)
         self.build_singularity_primitives()
         self.build_segment_primitives()
-        self.build_addons(scene_json)
+        self.build_addons()
+        self.build_parent_object()
         self.build_ground()
-        self.build_camera(scene_json)
+        self.build_camera()
         self.build_direct_light()
         self.build_indirect_light()
 
     def renderSingle(self):
-        scene_file = open(self.config.scene_path + self.config.scene_name)
-        scene_json = json.load(scene_file)
-        self.clean()
-        self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
-        self.build_main_mesh(self.config.scene_path + self.config.object_name)
-        self.build_singularity_primitives()
-        self.build_segment_primitives()
-        self.build_addons(scene_json)
-        self.build_ground()
-        self.build_camera(scene_json)
-        self.build_direct_light()
-        self.build_indirect_light()
+        self.buildOnly()
         self.do_render()
 
     def renderDir(self):
@@ -446,20 +477,7 @@ class RenderCore:
                 self.config.object_name = obj_list[i]
                 self.config.scene_name = scene_list[i]
                 self.config.output_path = output_path
-
-                scene_file = open(self.config.scene_path + self.config.scene_name)
-                scene_json = json.load(scene_file)
-                self.clean()
-                self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
-                self.build_main_mesh(self.config.scene_path + self.config.object_name)
-                self.build_singularity_primitives()
-                self.build_segment_primitives()
-                self.build_addons(scene_json)
-                self.build_ground()
-                self.build_camera(scene_json)
-                self.build_direct_light()
-                self.build_indirect_light()
-                self.do_render()
+                self.renderSingle()
 
     def renderModelDir(self):
         f_list = os.listdir(self.config.scene_path)
@@ -504,19 +522,8 @@ class RenderCore:
                 os.makedirs(rotation_path)
             output_path = rotation_path + self.config.object_name.split('.')[0] + ("_rotation_%03d.png" % (rotation))
             self.config.output_path = output_path
-            # self.renderSingle()
-            scene_file = open(self.config.scene_path + self.config.scene_name)
-            scene_json = json.load(scene_file)
-            self.clean()
-            self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
-            self.build_main_mesh(self.config.scene_path + self.config.object_name)
-            self.build_singularity_primitives()
-            self.build_segment_primitives()
-            self.build_addons(scene_json)
-            self.build_ground()
-            self.build_camera(scene_json)
-            self.build_direct_light()
-            self.build_indirect_light()
+
+            self.buildOnly()
             self.build_rotation()
             self.do_render()
 
@@ -527,19 +534,7 @@ class RenderCore:
         output_path = path + "/Output/" + self.config.object_name.split(".")[0] + "_rotation.avi"
         self.config.output_path = output_path
 
-        scene_file = open(self.config.scene_path + self.config.scene_name)
-        scene_json = json.load(scene_file)
-        self.clean()
-        self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
-        self.build_main_mesh(self.config.scene_path + self.config.object_name)
-        self.build_singularity_primitives()
-        self.build_segment_primitives()
-        self.build_addons(scene_json)
-        self.build_ground()
-        self.build_camera(scene_json)
-        self.build_direct_light()
-        self.build_indirect_light()
-
+        self.buildOnly()
         objects = bpy.data.objects
         rotation_object = bpy.data.objects.new("empty", None)
         bpy.context.scene.collection.objects.link(rotation_object)
