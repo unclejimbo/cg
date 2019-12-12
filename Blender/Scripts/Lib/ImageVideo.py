@@ -103,10 +103,6 @@ class TaskImageVideo():
         cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
               self.JpgPath + self.input_format + " -c:v libx264" + \
               " -pix_fmt " + self.pixel_format + " " + self.VideoOutput + self.VideoName + ".mp4"
-
-        # cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
-        #       self.JpgPath + self.input_format + \
-        #       " -pix_fmt " + self.pixel_format + " " + self.VideoOutput + self.VideoName + ".mp4"
         os.system(cmd)
         print("write done")
 
