@@ -264,6 +264,11 @@ class RenderCore:
                     edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 14']
                 elif c['zeroConnected'] == True:
                     edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 5']
+            elif self.config.cut_mode == 'incoherent':
+                if c['incoherent'] == False:
+                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 14']
+                elif c['incoherent'] == True:
+                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 8']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(edge_instance)
@@ -280,6 +285,11 @@ class RenderCore:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
                 elif c['zeroConnected'] == True:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 5']
+            elif self.config.cut_mode == 'incoherent':
+                if c['incoherent'] == False:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                elif c['incoherent'] == True:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 8']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
@@ -295,6 +305,11 @@ class RenderCore:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
                 elif c['zeroConnected'] == True:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 5']
+            elif self.config.cut_mode == 'incoherent':
+                if c['incoherent'] == False:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                elif c['incoherent'] == True:
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 8']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
