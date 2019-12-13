@@ -355,9 +355,9 @@ class RenderCore:
             plane = dst.objects[9]
             # zmin = bpy.data.objects['Mesh'].bound_box[0][1]
 
-            z_offset = -0.5
-            parent_object.location[2] -= objects['Mesh'].bound_box[0][1]
-            parent_object.location[2] += z_offset
+            z_offset = -1.0
+            # parent_object.location[2] -= objects['Mesh'].bound_box[0][1]
+            # parent_object.location[2] += z_offset
 
             grid.location[2] = z_offset
             number.location[2] = z_offset
