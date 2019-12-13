@@ -268,7 +268,7 @@ class RenderCore:
                 if c['incoherent'] == False:
                     edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 14']
                 elif c['incoherent'] == True:
-                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 8']
+                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 11']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(edge_instance)
@@ -289,7 +289,7 @@ class RenderCore:
                 if c['incoherent'] == False:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
                 elif c['incoherent'] == True:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 8']
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 11']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
@@ -309,7 +309,7 @@ class RenderCore:
                 if c['incoherent'] == False:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
                 elif c['incoherent'] == True:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 8']
+                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 11']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
