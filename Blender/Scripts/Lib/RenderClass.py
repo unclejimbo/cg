@@ -257,7 +257,7 @@ class RenderCore:
                 (0, 0, 1)).rotation_difference(p0 - p1)
             edge_instance.instance_type = 'COLLECTION'
 
-            if self.config.cut_mode == "Segment":
+            if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
                 edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(seg)]
             elif self.config.cut_mode == "zero_mode":
                 if c['zeroConnected'] == False:
@@ -278,7 +278,7 @@ class RenderCore:
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
             # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            if self.config.cut_mode == "Segment":
+            if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
                 vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
             elif self.config.cut_mode == "zero_mode":
                 if c['zeroConnected'] == False:
@@ -298,7 +298,7 @@ class RenderCore:
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
             # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            if self.config.cut_mode == "Segment":
+            if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
                 vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
             elif self.config.cut_mode == "zero_mode":
                 if c['zeroConnected'] == False:
