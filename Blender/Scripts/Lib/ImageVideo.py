@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append("..")
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import cv2
 import imageio
 
@@ -38,11 +38,14 @@ class TaskImageVideo():
             if os.path.splitext(filename)[1] == '.png':
                 img = Image.open(self.ImageInput + filename)
                 output_name = self.PngPath + "image_%03d" % (idx) + ".png"
+
+                draw = ImageDraw.Draw(img)
+                width, height = img.size
+                font = ImageFont.truetype("arial.ttf", 50)
+                draw.text((100, height-100), os.path.splitext(filename)[0], font=font, fill="#ff0000")
                 img.save(output_name)
                 # os.remove(self.ImageInput + filename)
                 idx += 1
-
-    #                 os.rename(self.ImageInput+filename, output_name)
 
     def PreProcessing(self):
         self.JpgPath = self.ImageInput + "Jpg/"
