@@ -76,7 +76,7 @@ material_filename = None
 
 model_color = (1.0, 1.0, 1.0, 1.0)
 
-transform_path = path + "/Data/Transform/transform.json"
+transform_path = path + "/Scene/transform.json"
 
 
 class Config:

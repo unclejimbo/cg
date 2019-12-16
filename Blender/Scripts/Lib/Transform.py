@@ -9,7 +9,8 @@ if __name__ == "__main__":
     path = os.path.dirname(path)
     path = os.path.dirname(path)
 
-    transform_path = path + "/Data/Transform/transform.json"
+    transform_path = path + "/Scene/transform.json"
+
     if not os.path.exists(transform_path):
         os.system(r"touch {}".format(transform_path))
     print(transform_path)
