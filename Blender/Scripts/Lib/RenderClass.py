@@ -317,6 +317,7 @@ class RenderCore:
     def build_parent_object(self):
         objects = bpy.data.objects
         parent_object = bpy.data.objects.new("Parent Object", None)
+        parent_object.rotation_mode = 'XYZ'
         bpy.context.scene.collection.objects.link(parent_object)
         for i in range(0, len(objects)):
             if 'Cut Vertex Instance' in objects[i].name \
@@ -326,6 +327,15 @@ class RenderCore:
                     or 'Singular Faces' in objects[i].name:
                 objects[i].parent = parent_object
         objects['Mesh'].parent = parent_object
+        if os.path.exists(self.config.transform_path):
+            #read json
+            with open(self.config.transform_path, 'r') as load_f:
+                transform = json.load(load_f)
+            # set transform
+            for i in range(3):
+                parent_object.location[i] = transform['Location'][i]
+                parent_object.rotation_euler[i] = transform['Rotation'][i]
+                parent_object.scale[i] = transform['Scale'][i]
 
     def build_ground(self):
         objects = bpy.data.objects

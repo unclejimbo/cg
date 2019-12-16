@@ -76,6 +76,9 @@ material_filename = None
 
 model_color = (1.0, 1.0, 1.0, 1.0)
 
+transform_path = path + "/Data/Transform/transform.json"
+
+
 class Config:
     def __init__(self, singular_colors=singular_colors, segment_colors=segment_colors, data_path=data_path,
                  texture_path=texture_path, envmap_path=envmap_path, scene_path=SCENE_PATH, output_path=OUTPUT_PATH,
@@ -89,7 +92,7 @@ class Config:
                  material_filename = material_filename, wireframe_color = wireframe_color, scene = scene,
                  singularity_material = singularity_material, edge_material = edge_material, model_color = model_color,
                  loop_material = loop_material, singular_face_material = singular_face_material, cut_json_name = cut_json_name,
-                 singularity_json_name = singularity_json_name):
+                 singularity_json_name = singularity_json_name, transform_path = transform_path):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -132,6 +135,7 @@ class Config:
         self.singular_face_material = singular_face_material
         self.cut_json_name = cut_json_name
         self.singularity_json_name = singularity_json_name
+        self.transform_path = transform_path
 
     def save_config(self):
         config_dict = {}
@@ -177,6 +181,7 @@ class Config:
         config_dict['singular_face_material'] = self.singular_face_material
         config_dict['cut_json_name'] = self.cut_json_name
         config_dict['singularity_json_name'] = self.singularity_json_name
+        config_dict['transform_path'] = self.transform_path
 
         with open(self.config_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)
