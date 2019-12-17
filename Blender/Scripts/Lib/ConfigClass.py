@@ -18,8 +18,8 @@ envmap_path = data_path + 'HDR/gl-hdr-02.hdr'
 
 # envmap_path = data_path + 'HDR/green_point_park_2k.hdr'
 
-blender_path = "D:/tools/blender_2.81/blender.exe"
-background_render = False
+# blender_path = "D:/tools/blender_2.81/blender.exe"
+
 SCENE_PATH = "../../Scene/eight/"
 scene_name = "scene.json"
 cut_json_name = "cuts.json"
@@ -58,6 +58,7 @@ singular_face_material = None
 loop_material = None
 
 roughness = 0.0
+specular = 0.0
 
 cut_mode = 'Segment'
 show_singularity = True
@@ -77,22 +78,26 @@ material_filename = None
 model_color = (1.0, 1.0, 1.0, 1.0)
 
 transform_path = path + "/Scene/transform.json"
+animation_output = path
 
+sheen = 0.0
+clearcoat = 0.0
 
 class Config:
     def __init__(self, singular_colors=singular_colors, segment_colors=segment_colors, data_path=data_path,
                  texture_path=texture_path, envmap_path=envmap_path, scene_path=SCENE_PATH, output_path=OUTPUT_PATH,
-                 width=WIDTH, height=HEIGHT, config_path=CONFIG_PATH, scene_name=scene_name, mode=mode,
+                 width=WIDTH, height=HEIGHT, scene_name=scene_name, mode=mode, sheen=sheen,
                  object_name=object_name, material=material, plane=plane, rotation_start=rotation_start,
                  rotation_end=rotation_end, rotation_step=rotation_step, edge_scale=edge_scale,
                  singularity_scale=singularity_scale, roughness=roughness, rotation_axis=rotation_axis,
                  cut_mode=cut_mode, show_singularity=show_singularity, show_singular_face=show_singular_face,
-                 show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
-                 use_envmap=use_envmap, background_render=background_render, wireframe_size=wireframe_size,
+                 show_loops=show_loops, uv_multiply=uv_multiply, uv_add=uv_add, clearcoat=clearcoat,
+                 use_envmap=use_envmap, wireframe_size=wireframe_size, animation_output=animation_output,
                  material_filename=material_filename, wireframe_color=wireframe_color, scene=scene,
                  singularity_material=singularity_material, edge_material=edge_material, model_color=model_color,
-                 loop_material=loop_material, singular_face_material=singular_face_material, cut_json_name=cut_json_name,
-                 singularity_json_name=singularity_json_name, transform_path=transform_path):
+                 loop_material=loop_material, singular_face_material=singular_face_material,
+                 cut_json_name=cut_json_name, singularity_json_name=singularity_json_name,
+                 transform_path=transform_path, specular=specular):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -102,10 +107,10 @@ class Config:
         self.output_path = output_path
         self.width = width
         self.height = height
-        self.config_path = config_path
         self.scene_name = scene_name
         self.object_name = object_name
         self.mode = mode
+        self.sheen = sheen
         self.material = material
         self.plane = plane
         self.rotation_start = rotation_start
@@ -119,12 +124,12 @@ class Config:
         self.show_singularity = show_singularity
         self.show_singular_face = show_singular_face
         self.show_loops = show_loops
-        self.blender_path = blender_path
         self.uv_multiply = uv_multiply
         self.uv_add = uv_add
+        self.clearcoat = clearcoat
         self.use_envmap = use_envmap
-        self.background_render = background_render
         self.wireframe_size = wireframe_size
+        self.animation_output = animation_output
         self.material_filename = material_filename
         self.wireframe_color = wireframe_color
         self.scene = scene
@@ -136,8 +141,9 @@ class Config:
         self.cut_json_name = cut_json_name
         self.singularity_json_name = singularity_json_name
         self.transform_path = transform_path
+        self.specular = specular
 
-    def save_config(self):
+    def save_config(self, file_path):
         config_dict = {}
         config_dict['singular_colors'] = self.singular_colors
         config_dict['segment_colors'] = self.segment_colors
@@ -148,10 +154,10 @@ class Config:
         config_dict['output_path'] = self.output_path
         config_dict['width'] = self.width
         config_dict['height'] = self.height
-        config_dict['config_path'] = self.config_path
         config_dict['scene_name'] = self.scene_name
         config_dict['object_name'] = self.object_name
         config_dict['mode'] = self.mode
+        config_dict['sheen'] = self.sheen
         config_dict['material'] = self.material
         config_dict['plane'] = self.plane
         config_dict['rotation_start'] = self.rotation_start
@@ -165,12 +171,12 @@ class Config:
         config_dict['show_singularity'] = self.show_singularity
         config_dict['show_singular_face'] = self.show_singular_face
         config_dict['show_loops'] = self.show_loops
-        config_dict['blender_path'] = self.blender_path
         config_dict['uv_multiply'] = self.uv_multiply
         config_dict['uv_add'] = self.uv_add
+        config_dict['clearcoat'] = self.clearcoat
         config_dict['use_envmap'] = self.use_envmap
-        config_dict['background_render'] = self.background_render
         config_dict['wireframe_size'] = self.wireframe_size
+        config_dict['animation_output'] = self.animation_output
         config_dict['material_filename'] = self.material_filename
         config_dict['wireframe_color'] = self.wireframe_color
         config_dict['scene'] = self.scene
@@ -182,6 +188,7 @@ class Config:
         config_dict['cut_json_name'] = self.cut_json_name
         config_dict['singularity_json_name'] = self.singularity_json_name
         config_dict['transform_path'] = self.transform_path
+        config_dict['specular'] = self.specular
 
-        with open(self.config_path, 'w') as dump_f:
+        with open(file_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)

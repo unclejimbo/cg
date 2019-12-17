@@ -6,14 +6,17 @@ from ConfigClass import *
 
 class RenderScene:
     def __init__(self):
-        self.config = None
+        # self.config = None
+        self.blender_path = "D:/tools/blender_2.81/blender.exe"
+        self.background_render = True
+        self.config_path = "./config.json"
 
     def render(self):
-        cmd = self.config.blender_path + " --python ../Lib/BlenderBridge.py"
+        cmd = self.blender_path + " --python ../Lib/BlenderBridge.py"
         cmd += " -noaudio"
-        if self.config.background_render:
+        if self.background_render:
             cmd += " --background"
-        cmd += " -- -c " + str(self.config.config_path)
+        cmd += " -- -c " + str(self.config_path)
         print("start rendering...")
         os.system(cmd)
         print("done!")

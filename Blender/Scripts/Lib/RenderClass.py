@@ -15,6 +15,9 @@ class RenderCore:
         self.MaterialFactory = MaterialFactory()
         self.MaterialFactory.texture_path = self.config.texture_path
         self.MaterialFactory.roughness = self.config.roughness
+        self.MaterialFactory.specular = self.config.specular
+        self.MaterialFactory.sheen = self.config.sheen
+        self.MaterialFactory.clearcoat = self.config.clearcoat
         self.MaterialFactory.wireframe_size = self.config.wireframe_size
         self.MaterialFactory.material_filename = self.config.material_filename
         self.MaterialFactory.wireframe_color = self.config.wireframe_color
@@ -151,6 +154,15 @@ class RenderCore:
             mat.node_tree.links.new(texcoord_node.outputs['UV'], mutiply_node.inputs[0])
             mat.node_tree.links.new(mutiply_node.outputs['Vector'], add_node.inputs[0])
             mat.node_tree.links.new(add_node.outputs['Vector'], img_node.inputs['Vector'])
+        if self.config.material_filename == "99-porcelain-texture.blend":
+            # set texture
+            mat.node_tree.nodes['Image Texture'].image = bpy.data.images.load(filepath=self.config.texture_path)
+            # Add
+            mat.node_tree.nodes['Vector Math'].inputs[1].default_value[0] = self.config.uv_add[0]
+            mat.node_tree.nodes['Vector Math'].inputs[1].default_value[1] = self.config.uv_add[1]
+            # Multiply
+            mat.node_tree.nodes['Vector Math.001'].inputs[1].default_value[0] = self.config.uv_multiply[0]
+            mat.node_tree.nodes['Vector Math.001'].inputs[1].default_value[1] = self.config.uv_multiply[1]
         mesh_obj.active_material = mat
 
         # rotate
@@ -557,7 +569,7 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
-            rotation_path = path + "/Output/" + self.config.scene + "/Rotation/" + self.config.rotation_axis + "/"
+            rotation_path = self.config.animation_output + "/Output/" + self.config.scene + "/Rotation/" + self.config.rotation_axis + "/"
             if not os.path.exists(rotation_path):
                 os.makedirs(rotation_path)
             output_path = rotation_path + self.config.object_name.split('.')[0] + ("_rotation_%03d.png" % (rotation))

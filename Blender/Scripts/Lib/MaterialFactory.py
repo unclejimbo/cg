@@ -12,6 +12,8 @@ class MaterialFactory:
     def __init__(self):
         self.roughness = 0.0
         self.specular = 0.0
+        self.sheen = None
+        self.clearcoat = None
         self.texture_path = None
         self.color = None
         self.wireframecolor = (0.026, 0.831, 0.888, 1)
@@ -48,6 +50,8 @@ class MaterialFactory:
         bsdf_node = mat.node_tree.nodes['Principled BSDF']
         bsdf_node.inputs['Roughness'].default_value = self.roughness
         bsdf_node.inputs['Specular'].default_value = self.specular
+        bsdf_node.inputs['Sheen'].default_value = self.sheen
+        bsdf_node.inputs['Clearcoat'].default_value = self.clearcoat
         mat.node_tree.links.new(
             img_node.outputs['Color'], bsdf_node.inputs['Base Color'])
         return mat
@@ -509,7 +513,7 @@ class MaterialFactory:
         path = os.path.dirname(path)
         path = os.path.dirname(path)
         filename = path + "/Data/Materials/" + self.material_filename
-        with bpy.data.libraries.load(filename, link=True) as (src, dst):
+        with bpy.data.libraries.load(filename, link=False) as (src, dst):
             dst.materials = src.materials
         return dst.materials[0]
 
