@@ -10,6 +10,7 @@ class RenderScene:
 
     def render(self):
         cmd = self.config.blender_path + " --python ../Lib/BlenderBridge.py"
+        cmd += " -noaudio"
         if self.config.background_render:
             cmd += " --background"
         cmd += " -- -c " + str(self.config.config_path)
