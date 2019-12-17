@@ -66,6 +66,21 @@ class RenderCore:
             bpy.data.lights.remove(item)
 
     def setup_renderer(self, output_path, width, height):
+        prefs = bpy.context.preferences
+        cprefs = prefs.addons['cycles'].preferences
+        for compute_device_type in ('CUDA', 'OPENCL', 'NONE'):
+            try:
+                cprefs.compute_device_type = compute_device_type
+                break
+            except TypeError:
+                pass
+
+        cprefs.get_devices()
+        print('Num devices:', len(cprefs.devices))
+        for device in cprefs.devices:
+            print('Use device', device.name)
+            device.use = True
+
         bpy.context.scene.render.engine = 'CYCLES'
         bpy.context.scene.cycles.device = 'GPU'
         bpy.context.scene.render.filepath = output_path
