@@ -3,7 +3,7 @@ import json
 
 
 singular_colors = {
-    '-1': 0x00F3FF, '-2': 0x0074FF, '-3': 0x0000FF, '1': 0xFFBC00, '2': 0xFF5500
+    '-1': 0x00DCFF, '-2': 0x0080FF, '-3': 0x8000FF, '1': 0xFFFF00, '2': 0xFF8000
 }
 
 segment_colors = [0x800000, 0xD2691E, 0x808000, 0x008080, 0x000080,
@@ -88,11 +88,11 @@ class Config:
                  singularity_scale=singularity_scale, roughness=roughness, rotation_axis=rotation_axis,
                  cut_mode=cut_mode, show_singularity=show_singularity, show_singular_face=show_singular_face,
                  show_loops=show_loops, blender_path=blender_path, uv_multiply=uv_multiply, uv_add=uv_add,
-                 use_envmap=use_envmap, background_render=background_render, wireframe_size = wireframe_size,
-                 material_filename = material_filename, wireframe_color = wireframe_color, scene = scene,
-                 singularity_material = singularity_material, edge_material = edge_material, model_color = model_color,
-                 loop_material = loop_material, singular_face_material = singular_face_material, cut_json_name = cut_json_name,
-                 singularity_json_name = singularity_json_name, transform_path = transform_path):
+                 use_envmap=use_envmap, background_render=background_render, wireframe_size=wireframe_size,
+                 material_filename=material_filename, wireframe_color=wireframe_color, scene=scene,
+                 singularity_material=singularity_material, edge_material=edge_material, model_color=model_color,
+                 loop_material=loop_material, singular_face_material=singular_face_material, cut_json_name=cut_json_name,
+                 singularity_json_name=singularity_json_name, transform_path=transform_path):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
