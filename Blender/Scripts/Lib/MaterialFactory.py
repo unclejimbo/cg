@@ -74,7 +74,7 @@ class MaterialFactory:
         path = os.path.dirname(path)
         path = os.path.dirname(path)
         filename = path + "/Data/Materials/" + "55-tomato-material-modified.blend"
-        with bpy.data.libraries.load(filename, link=True) as (src, dst):
+        with bpy.data.libraries.load(filename, link=False) as (src, dst):
             dst.materials = src.materials
         return dst.materials[0]
 
