@@ -29,11 +29,22 @@ class RenderCore:
     def blender_vec(self, vec):
         return (vec[0], -vec[2], vec[1])
 
+    def gammaCorrect(self, srgb):
+        if srgb < 0:
+            return 0
+        elif srgb < 0.04045:
+            return srgb / 12.92
+        else:
+            return ((srgb + 0.055) / 1.055) ** 2.4
+
     def hex2rgba(self, h):
         b = (h & 0xFF) / 255.0
         g = ((h >> 8) & 0xFF) / 255.0
         r = ((h >> 16) & 0xFF) / 255.0
-        return r, g, b, 1.0
+        linearR = self.gammaCorrect(r)
+        linearG = self.gammaCorrect(g)
+        linearB = self.gammaCorrect(b)
+        return linearR, linearG, linearB, 1.0
 
     def load_json(self):
         scene_json_path = self.config.scene_path + self.config.scene_name
@@ -210,6 +221,11 @@ class RenderCore:
                 self.MaterialFactory.material_filename = self.config.singularity_material
                 mat = self.MaterialFactory.CreateFromFile()
                 self.MaterialFactory.material_filename = tmp
+                if self.config.show_singularity_color == True and\
+                        self.config.singularity_material == "75-phone-screen.blend":
+                    glossy_bsdf_node = mat.node_tree.nodes['Glossy BSDF']
+                    # hex to rgba
+                    glossy_bsdf_node.inputs[0].default_value = self.hex2rgba(color)
 
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4)
             sphere = bpy.data.objects['Icosphere']
@@ -566,9 +582,6 @@ class RenderCore:
         for rotation in np.arange(self.config.rotation_start, self.config.rotation_end, self.config.rotation_step):
             self.rotation = radians(rotation)
             self.rotation = rotation
-            path = os.getcwd()
-            path = os.path.dirname(path)
-            path = os.path.dirname(path)
             rotation_path = self.config.animation_output + "/Output/" + self.config.scene + "/Rotation/" + self.config.rotation_axis + "/"
             if not os.path.exists(rotation_path):
                 os.makedirs(rotation_path)
