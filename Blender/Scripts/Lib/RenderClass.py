@@ -276,13 +276,14 @@ class RenderCore:
 
         # for i, s in enumerate(scene_json['singularities']):
         for i, s in enumerate(self.singularity_json):
-            instance = bpy.data.objects.new('Singularity Instance ' + str(i), None)
-            instance.location = self.blender_vec(s['position'])
-            instance.scale = (self.config.singularity_scale, self.config.singularity_scale, self.config.singularity_scale)
-            instance.instance_type = 'COLLECTION'
-            instance.instance_collection = bpy.data.collections['Singularity' + str(s['index'])]
-            if self.config.show_singularity == True:
-                singularities_collection.objects.link(instance)
+            if s['type'] == 'vertex':
+                instance = bpy.data.objects.new('Singularity Instance ' + str(i), None)
+                instance.location = self.blender_vec(s['position'])
+                instance.scale = (self.config.singularity_scale, self.config.singularity_scale, self.config.singularity_scale)
+                instance.instance_type = 'COLLECTION'
+                instance.instance_collection = bpy.data.collections['Singularity' + str(s['index'])]
+                if self.config.show_singularity == True:
+                    singularities_collection.objects.link(instance)
 
         cuts_collection = bpy.data.collections.new('Cuts')
         scene_collection.children.link(cuts_collection)
