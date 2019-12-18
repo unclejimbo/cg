@@ -24,6 +24,7 @@ SCENE_PATH = "../../Scene/eight/"
 scene_name = "scene.json"
 cut_json_name = "cuts.json"
 singularity_json_name = "singularities.json"
+transform_json_name = "transform.json"
 
 scene = "eight"
 object_name = "mesh.obj"
@@ -78,11 +79,11 @@ material_filename = None
 
 model_color = (1.0, 1.0, 1.0, 1.0)
 
-transform_path = path + "/Scene/transform.json"
 animation_output = path
 
 sheen = 0.0
 clearcoat = 0.0
+
 
 class Config:
     def __init__(self, singular_colors=singular_colors, segment_colors=segment_colors, data_path=data_path,
@@ -98,7 +99,7 @@ class Config:
                  singularity_material=singularity_material, edge_material=edge_material, model_color=model_color,
                  loop_material=loop_material, singular_face_material=singular_face_material,
                  cut_json_name=cut_json_name, singularity_json_name=singularity_json_name,
-                 transform_path=transform_path, specular=specular, show_singularity_color=show_singularity_color):
+                 transform_json_name=transform_json_name, specular=specular, show_singularity_color=show_singularity_color):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.data_path = data_path
@@ -141,7 +142,7 @@ class Config:
         self.singular_face_material = singular_face_material
         self.cut_json_name = cut_json_name
         self.singularity_json_name = singularity_json_name
-        self.transform_path = transform_path
+        self.transform_json_name = transform_json_name
         self.specular = specular
         self.show_singularity_color = show_singularity_color
 
@@ -189,7 +190,7 @@ class Config:
         config_dict['singular_face_material'] = self.singular_face_material
         config_dict['cut_json_name'] = self.cut_json_name
         config_dict['singularity_json_name'] = self.singularity_json_name
-        config_dict['transform_path'] = self.transform_path
+        config_dict['transform_json_name'] = self.transform_json_name
         config_dict['specular'] = self.specular
         config_dict['show_singularity_color'] = self.show_singularity_color
 

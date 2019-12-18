@@ -9,6 +9,7 @@ from mathutils import Matrix, Euler, Vector
 import numpy as np
 from MaterialFactory import MaterialFactory
 
+
 class RenderCore:
     def __init__(self, config):
         self.config = config
@@ -47,15 +48,8 @@ class RenderCore:
         return linearR, linearG, linearB, 1.0
 
     def load_json(self):
-        scene_json_path = self.config.scene_path + self.config.scene_name
         cut_json_path = self.config.scene_path + self.config.cut_json_name
         singularity_json_path = self.config.scene_path + self.config.singularity_json_name
-        if os.path.exists(scene_json_path):
-            scene_file = open(scene_json_path)
-            scene_json = json.load(scene_file)
-            # load sinularities and cuts
-            self.singularity_json = scene_json['singularities']
-            self.cut_json = scene_json['cuts']
         if os.path.exists(cut_json_path):
             cut_file = open(cut_json_path)
             cut_json = json.load(cut_file)
@@ -112,25 +106,26 @@ class RenderCore:
         tree.links.new(render_node.outputs['Image'], alpha_node.inputs[2])
         tree.links.new(render_node.outputs['Alpha'], alpha_node.inputs[0])
         tree.links.new(alpha_node.outputs[0], vieweroutput_node.inputs[0])
-        tree.links.new(render_node.outputs['Image'], originoutput_node.inputs[0])
+        tree.links.new(
+            render_node.outputs['Image'], originoutput_node.inputs[0])
 
     def choose_material(self):
         material_list = ['model_only', 'color_only', 'original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
-                        'peeling_paint', 'paint', 'vertex_color', 'wireframe_only']
+                         'peeling_paint', 'paint', 'vertex_color', 'wireframe_only']
         if self.config.material in material_list and self.config.material_filename is None:
             material_function = {
-                'model_only' : self.MaterialFactory.CreateModelOnly(),
+                'model_only': self.MaterialFactory.CreateModelOnly(),
                 'color_only': self.MaterialFactory.CreateColorOnly(),
                 'original': self.MaterialFactory.CreateMain(),
                 'gold': self.MaterialFactory.CreateGold(),
                 'glass': self.MaterialFactory.CreateGlass(),
                 'ceramic': self.MaterialFactory.CreateCeramic(),
                 'roughblue': self.MaterialFactory.CreateRoughBlue(),
-                'wireframe' : self.MaterialFactory.CreateWireframe(),
-                'peeling_paint' : self.MaterialFactory.CreatePeelingPaint(),
-                'paint' : self.MaterialFactory.CreatePaint(),
-                'vertex_color' : self.MaterialFactory.CreateVertexColor(),
-                'wireframe_only' : self.MaterialFactory.CreateWireframeOnly()
+                'wireframe': self.MaterialFactory.CreateWireframe(),
+                'peeling_paint': self.MaterialFactory.CreatePeelingPaint(),
+                'paint': self.MaterialFactory.CreatePaint(),
+                'vertex_color': self.MaterialFactory.CreateVertexColor(),
+                'wireframe_only': self.MaterialFactory.CreateWireframeOnly()
                 # 'vertex_color_cmap' : self.MaterialFactory.CreateVertexColorCmap()
             }
             mat = material_function[self.config.material]
@@ -162,12 +157,16 @@ class RenderCore:
             add_node.inputs[1].default_value[0] = self.config.uv_add[0]
             add_node.inputs[1].default_value[1] = self.config.uv_add[1]
             # link nodes
-            mat.node_tree.links.new(texcoord_node.outputs['UV'], mutiply_node.inputs[0])
-            mat.node_tree.links.new(mutiply_node.outputs['Vector'], add_node.inputs[0])
-            mat.node_tree.links.new(add_node.outputs['Vector'], img_node.inputs['Vector'])
+            mat.node_tree.links.new(
+                texcoord_node.outputs['UV'], mutiply_node.inputs[0])
+            mat.node_tree.links.new(
+                mutiply_node.outputs['Vector'], add_node.inputs[0])
+            mat.node_tree.links.new(
+                add_node.outputs['Vector'], img_node.inputs['Vector'])
         if self.config.material_filename == "99-porcelain-texture.blend":
             # set texture
-            mat.node_tree.nodes['Image Texture'].image = bpy.data.images.load(filepath=self.config.texture_path)
+            mat.node_tree.nodes['Image Texture'].image = bpy.data.images.load(
+                filepath=self.config.texture_path)
             # Add
             mat.node_tree.nodes['Vector Math'].inputs[1].default_value[0] = self.config.uv_add[0]
             mat.node_tree.nodes['Vector Math'].inputs[1].default_value[1] = self.config.uv_add[1]
@@ -190,7 +189,8 @@ class RenderCore:
                 mat = self.MaterialFactory.CreateFromFile()
                 self.MaterialFactory.material_filename = tmp
 
-            bpy.ops.import_scene.obj(filepath=self.config.scene_path + "singularFaces.obj", use_split_objects=False)
+            bpy.ops.import_scene.obj(
+                filepath=self.config.scene_path + "singularFaces.obj", use_split_objects=False)
             face_obj = bpy.data.objects["singularFaces"]
             face_obj.name = 'Singular Faces'
             face_obj.active_material = mat
@@ -205,7 +205,8 @@ class RenderCore:
                 mat = self.MaterialFactory.CreateFromFile()
                 self.MaterialFactory.material_filename = tmp
 
-            bpy.ops.import_scene.obj(filepath=self.config.scene_path + "loops.obj", use_split_objects=False)
+            bpy.ops.import_scene.obj(
+                filepath=self.config.scene_path + "loops.obj", use_split_objects=False)
             loop_obj = bpy.data.objects["loops"]
             loop_obj.name = 'Loops'
             loop_obj.active_material = mat
@@ -225,7 +226,8 @@ class RenderCore:
                         self.config.singularity_material == "75-phone-screen.blend":
                     glossy_bsdf_node = mat.node_tree.nodes['Glossy BSDF']
                     # hex to rgba
-                    glossy_bsdf_node.inputs[0].default_value = self.hex2rgba(color)
+                    glossy_bsdf_node.inputs[0].default_value = self.hex2rgba(
+                        color)
 
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4)
             sphere = bpy.data.objects['Icosphere']
@@ -277,11 +279,14 @@ class RenderCore:
         # for i, s in enumerate(scene_json['singularities']):
         for i, s in enumerate(self.singularity_json):
             if s['type'] == 'vertex':
-                instance = bpy.data.objects.new('Singularity Instance ' + str(i), None)
+                instance = bpy.data.objects.new(
+                    'Singularity Instance ' + str(i), None)
                 instance.location = self.blender_vec(s['position'])
-                instance.scale = (self.config.singularity_scale, self.config.singularity_scale, self.config.singularity_scale)
+                instance.scale = (self.config.singularity_scale,
+                                  self.config.singularity_scale, self.config.singularity_scale)
                 instance.instance_type = 'COLLECTION'
-                instance.instance_collection = bpy.data.collections['Singularity' + str(s['index'])]
+                instance.instance_collection = bpy.data.collections['Singularity' + str(
+                    s['index'])]
                 if self.config.show_singularity == True:
                     singularities_collection.objects.link(instance)
 
@@ -293,16 +298,19 @@ class RenderCore:
             p0 = mathutils.Vector(self.blender_vec(c['points'][0]))
             p1 = mathutils.Vector(self.blender_vec(c['points'][1]))
 
-            edge_instance = bpy.data.objects.new('Cut Edge Instance ' + str(i), None)
+            edge_instance = bpy.data.objects.new(
+                'Cut Edge Instance ' + str(i), None)
             edge_instance.location = (p0 + p1) / 2
-            edge_instance.scale = (self.config.edge_scale, self.config.edge_scale, (p0 - p1).magnitude / 2)
+            edge_instance.scale = (
+                self.config.edge_scale, self.config.edge_scale, (p0 - p1).magnitude / 2)
             edge_instance.rotation_mode = 'QUATERNION'
             edge_instance.rotation_quaternion = mathutils.Vector(
                 (0, 0, 1)).rotation_difference(p0 - p1)
             edge_instance.instance_type = 'COLLECTION'
 
             if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
-                edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(seg)]
+                edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(
+                    seg)]
             elif self.config.cut_mode == "zero_mode":
                 if c['zeroConnected'] == False:
                     edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 14']
@@ -317,43 +325,53 @@ class RenderCore:
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(edge_instance)
 
-            vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2), None)
+            vertex_instance = bpy.data.objects.new(
+                'Cut Vertex Instance ' + str(i * 2), None)
             vertex_instance.location = p0
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
             # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
             if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
-                vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
+                vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(
+                    seg)]
             elif self.config.cut_mode == "zero_mode":
                 if c['zeroConnected'] == False:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                    vertex_instance.instance_collection = bpy.data.collections[
+                        'Cut Vertex Segment 14']
                 elif c['zeroConnected'] == True:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 5']
             elif self.config.cut_mode == 'incoherent':
                 if c['incoherent'] == False:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                    vertex_instance.instance_collection = bpy.data.collections[
+                        'Cut Vertex Segment 14']
                 elif c['incoherent'] == True:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 11']
+                    vertex_instance.instance_collection = bpy.data.collections[
+                        'Cut Vertex Segment 11']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
-            vertex_instance = bpy.data.objects.new('Cut Vertex Instance ' + str(i * 2 + 1), None)
+            vertex_instance = bpy.data.objects.new(
+                'Cut Vertex Instance ' + str(i * 2 + 1), None)
             vertex_instance.location = p1
             vertex_instance.scale = (0.002, 0.002, 0.002)
             vertex_instance.instance_type = 'COLLECTION'
             # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
             if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
-                vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
+                vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(
+                    seg)]
             elif self.config.cut_mode == "zero_mode":
                 if c['zeroConnected'] == False:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                    vertex_instance.instance_collection = bpy.data.collections[
+                        'Cut Vertex Segment 14']
                 elif c['zeroConnected'] == True:
                     vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 5']
             elif self.config.cut_mode == 'incoherent':
                 if c['incoherent'] == False:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 14']
+                    vertex_instance.instance_collection = bpy.data.collections[
+                        'Cut Vertex Segment 14']
                 elif c['incoherent'] == True:
-                    vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment 11']
+                    vertex_instance.instance_collection = bpy.data.collections[
+                        'Cut Vertex Segment 11']
 
             if self.config.cut_mode != "None":
                 cuts_collection.objects.link(vertex_instance)
@@ -371,9 +389,12 @@ class RenderCore:
                     or 'Singular Faces' in objects[i].name:
                 objects[i].parent = parent_object
         objects['Mesh'].parent = parent_object
-        if os.path.exists(self.config.transform_path):
-            #read json
-            with open(self.config.transform_path, 'r') as load_f:
+
+        transform_json = os.path.join(
+            self.config.scene_path, self.config.transform_json_name)
+        if os.path.exists(transform_json):
+            # read json
+            with open(transform_json, 'r') as load_f:
                 transform = json.load(load_f)
             # set transform
             for i in range(3):
@@ -404,13 +425,17 @@ class RenderCore:
             # build checkerboard nodes
             node_tree = floor_mat.node_tree
             output_node = node_tree.nodes.new(type='ShaderNodeOutputMaterial')
-            principled_node = node_tree.nodes.new(type='ShaderNodeBsdfPrincipled')
-            checker_texture_node = node_tree.nodes.new(type='ShaderNodeTexChecker')
+            principled_node = node_tree.nodes.new(
+                type='ShaderNodeBsdfPrincipled')
+            checker_texture_node = node_tree.nodes.new(
+                type='ShaderNodeTexChecker')
             checker_texture_node.inputs['Scale'].default_value = 50
             # checker_texture_node.inputs['Color1'].default_value = (1, 0, 0, 1)
             # checker_texture_node.inputs['Color2'].default_value = (0, 0, 1, 1)
-            node_tree.links.new(checker_texture_node.outputs['Color'], principled_node.inputs['Base Color'])
-            node_tree.links.new(principled_node.outputs['BSDF'], output_node.inputs['Surface'])
+            node_tree.links.new(
+                checker_texture_node.outputs['Color'], principled_node.inputs['Base Color'])
+            node_tree.links.new(
+                principled_node.outputs['BSDF'], output_node.inputs['Surface'])
             plane_obj.active_material = floor_mat
         elif self.config.plane == "predefined":
             path = os.getcwd()
@@ -444,7 +469,7 @@ class RenderCore:
         path = os.path.dirname(path)
         path = os.path.dirname(path)
         filename = path + "/Data/Materials/predefined/predefined.blend"
-        with bpy.data.libraries.load(filename) as (src,dst):
+        with bpy.data.libraries.load(filename) as (src, dst):
             dst.objects = src.objects
 
         cam = dst.objects[23]
@@ -464,7 +489,7 @@ class RenderCore:
         path = os.path.dirname(path)
         path = os.path.dirname(path)
         filename = path + "/Data/Materials/predefined/predefined.blend"
-        with bpy.data.libraries.load(filename) as (src,dst):
+        with bpy.data.libraries.load(filename) as (src, dst):
             dst.objects = src.objects
             dst.materials = src.materials
 
@@ -484,8 +509,10 @@ class RenderCore:
         world = bpy.context.scene.world
         world.use_nodes = True
         if self.config.use_envmap == True:
-            texcoord_node = world.node_tree.nodes.new(type='ShaderNodeTexCoord')
-            envmap_node = world.node_tree.nodes.new(type='ShaderNodeTexEnvironment')
+            texcoord_node = world.node_tree.nodes.new(
+                type='ShaderNodeTexCoord')
+            envmap_node = world.node_tree.nodes.new(
+                type='ShaderNodeTexEnvironment')
             envmap_node.image = bpy.data.images.load(self.config.envmap_path)
             world.node_tree.nodes['Background'].inputs['Strength'].default_value = 0.2
             world.node_tree.links.new(
@@ -498,7 +525,8 @@ class RenderCore:
         parent_object = objects["Parent Object"]
         parent_object.rotation_mode = 'XYZ'
         # rotation_object.rotation_euler.rotate_axis("Z", radians(self.rotation))
-        parent_object.rotation_euler.rotate_axis(self.config.rotation_axis, radians(self.rotation))
+        parent_object.rotation_euler.rotate_axis(
+            self.config.rotation_axis, radians(self.rotation))
 
     def do_render(self):
         bpy.ops.render.render(write_still=True)
@@ -506,7 +534,8 @@ class RenderCore:
     def buildOnly(self):
         self.load_json()
         self.clean()
-        self.setup_renderer(self.config.output_path, self.config.width, self.config.height)
+        self.setup_renderer(self.config.output_path,
+                            self.config.width, self.config.height)
         self.build_main_mesh(self.config.scene_path + self.config.object_name)
         self.build_singularity_primitives()
         self.build_segment_primitives()
@@ -541,7 +570,8 @@ class RenderCore:
                 path = os.getcwd()
                 path = os.path.dirname(path)
                 path = os.path.dirname(path)
-                output_path = path + "/Output/" + scene_list[i].split(".")[0] + ".png"
+                output_path = path + "/Output/" + \
+                    scene_list[i].split(".")[0] + ".png"
 
                 self.config.object_name = obj_list[i]
                 self.config.scene_name = scene_list[i]
@@ -559,7 +589,8 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
-            output_path = path + "/Output/" + obj_list[i].split(".")[0] + ".png"
+            output_path = path + "/Output/" + \
+                obj_list[i].split(".")[0] + ".png"
             self.config.output_path = output_path
             self.config.object_name = obj_list[i]
             self.renderSingle()
@@ -567,7 +598,7 @@ class RenderCore:
     def renderModelMaterial(self):
         material_list = ['original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
                          'peeling_paint', 'paint', 'Metal01',
-                         'Metal07', 'Metal08', 'Metal26','WoodFloor01', 'Marble01', 'Leather05',
+                         'Metal07', 'Metal08', 'Metal26', 'WoodFloor01', 'Marble01', 'Leather05',
                          'Fabric02', 'Fabric03', 'Concrete07', 'Chainmail02', 'vertex_color'
                          ]
         for material in material_list:
@@ -575,7 +606,8 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
-            output_path = path + "/Output/" + self.config.object_name.split(".")[0] + "_" + material + ".png"
+            output_path = path + "/Output/" + \
+                self.config.object_name.split(".")[0] + "_" + material + ".png"
             self.config.output_path = output_path
             self.renderSingle()
 
@@ -583,10 +615,13 @@ class RenderCore:
         for rotation in np.arange(self.config.rotation_start, self.config.rotation_end, self.config.rotation_step):
             self.rotation = radians(rotation)
             self.rotation = rotation
-            rotation_path = self.config.animation_output + "/Output/" + self.config.scene + "/Rotation/" + self.config.rotation_axis + "/"
+            rotation_path = self.config.animation_output + "/Output/" + \
+                self.config.scene + "/Rotation/" + self.config.rotation_axis + "/"
             if not os.path.exists(rotation_path):
                 os.makedirs(rotation_path)
-            output_path = rotation_path + self.config.object_name.split('.')[0] + ("_rotation_%03d.png" % (rotation))
+            output_path = rotation_path + \
+                self.config.object_name.split(
+                    '.')[0] + ("_rotation_%03d.png" % (rotation))
             self.config.output_path = output_path
 
             self.buildOnly()
@@ -597,7 +632,8 @@ class RenderCore:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
-        output_path = path + "/Output/" + self.config.object_name.split(".")[0] + "_rotation.avi"
+        output_path = path + "/Output/" + \
+            self.config.object_name.split(".")[0] + "_rotation.avi"
         self.config.output_path = output_path
 
         self.buildOnly()
@@ -639,6 +675,3 @@ class RenderCore:
             self.renderRotation()
         elif self.config.mode == 'rotation_animation':
             self.renderRotationAnimation()
-
-
-
