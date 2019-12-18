@@ -177,7 +177,7 @@ class RenderCore:
 
         # rotate
         # mesh_obj.rotation_euler.rotate_axis("Y", self.rotation)
-        if self.config.show_singular_face == True:
+        if self.config.show_singularities == True:
             # build singular faces
             # set material
             if self.config.singular_face_material is None:
@@ -287,7 +287,7 @@ class RenderCore:
                 instance.instance_type = 'COLLECTION'
                 instance.instance_collection = bpy.data.collections['Singularity' + str(
                     s['index'])]
-                if self.config.show_singularity == True:
+                if self.config.show_singularities == True:
                     singularities_collection.objects.link(instance)
 
         cuts_collection = bpy.data.collections.new('Cuts')
@@ -615,8 +615,9 @@ class RenderCore:
         for rotation in np.arange(self.config.rotation_start, self.config.rotation_end, self.config.rotation_step):
             self.rotation = radians(rotation)
             self.rotation = rotation
+            scenename = os.path.split(self.config.scene_path)[-1]
             rotation_path = self.config.animation_output + "/Output/" + \
-                self.config.scene + "/Rotation/" + self.config.rotation_axis + "/"
+                scenename + "/Rotation/" + self.config.rotation_axis + "/"
             if not os.path.exists(rotation_path):
                 os.makedirs(rotation_path)
             output_path = rotation_path + \
