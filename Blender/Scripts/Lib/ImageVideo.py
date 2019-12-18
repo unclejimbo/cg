@@ -44,6 +44,15 @@ class TaskImageVideo():
                 font = ImageFont.truetype("arial.ttf", 50)
                 draw.text((100, height-100), os.path.splitext(filename)[0], font=font, fill="#ff0000")
                 img.save(output_name)
+
+                # save another Jpg file
+                jpg_path = self.ImageInput + "Jpg2/"
+                if not os.path.exists(jpg_path):
+                    os.makedirs(jpg_path)
+                output_name_2 = jpg_path + os.path.splitext(filename)[0] + '.jpg'
+                img_rgb = Image.new("RGB", img.size, (255, 255, 255))
+                img_rgb.paste(img, mask=img.split()[3])
+                img_rgb.save(output_name_2)
                 # os.remove(self.ImageInput + filename)
                 idx += 1
 
@@ -120,5 +129,32 @@ class TaskImageVideo():
             filename = self.JpgPath + "/" + self.input_format%(i)
             writer.append_data(imageio.imread(filename))
         writer.close()
+        print("write done")
+
+    def ProduceComposedVideo(self, path1, path2, output_path):
+        f_list1 = os.listdir(path1)
+        f_list2 = os.listdir(path2)
+        count = 0
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        for filename in f_list1:
+            if filename in f_list2:
+                # image compose
+                img1 = Image.open(path1+filename)
+                img2 = Image.open(path2+filename)
+                size1 = img1.size
+                size2 = img2.size
+                joint = Image.new('RGB', (size1[0] + size2[0], size1[1]))
+                loc1, loc2 = (0, 0), (size1[0], 0)
+                joint.paste(img1, loc1)
+                joint.paste(img2, loc2)
+                output = output_path + "image_%03d"%(count) + ".jpg"
+                joint.save(output)
+                count += 1
+        # generate video
+        cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
+              output_path + "image_%03d.jpg" + " -c:v libx264" + \
+              " -pix_fmt " + self.pixel_format + " " + output_path + self.VideoName + ".mp4"
+        os.system(cmd)
         print("write done")
 
