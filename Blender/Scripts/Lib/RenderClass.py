@@ -197,7 +197,7 @@ class RenderCore:
         if self.config.show_loops == True:
             # build loop mesh
             if self.config.loop_material is None:
-                self.MaterialFactory.wireframecolor = (0.888, 0.888, 0, 1)
+                self.MaterialFactory.wireframecolor = (0.67, 0.67, 0.67, 1)
                 mat = self.MaterialFactory.CreateColoredWireframe()
             else:
                 tmp = self.config.material_filename

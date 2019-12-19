@@ -2,7 +2,7 @@ import os
 import json
 
 singular_colors = {
-    '-1': 0x00DCFF, '-2': 0x0080FF, '-3': 0x8000FF, '1': 0xFFFF00, '2': 0xFF8000
+    '-1': 0x00DCFF, '-2': 0x0080FF, '-3': 0x8000FF, '1': 0xFF0000, '2': 0xFFFF00
 }
 
 segment_colors = [0x800000, 0xD2691E, 0x808000, 0x008080, 0x000080,
