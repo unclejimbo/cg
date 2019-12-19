@@ -80,18 +80,18 @@ class TaskImageVideo():
                 # img_rgb.save(output_name)
 
     def CropImage(self):
-        self.JpgPath = self.ImageInput + "Jpg/"
+        jpg_path = self.ImageInput + "Jpg2/"
         self.CropPath = self.ImageInput + "Crop/"
-        if not os.path.exists(self.JpgPath):
-            os.makedirs(self.JpgPath)
+        if not os.path.exists(jpg_path):
+            os.makedirs(jpg_path)
         if not os.path.exists(self.CropPath):
             os.makedirs(self.CropPath)
         # crop image/remove white background
         # read from jpg file
-        f_list = os.listdir(self.JpgPath)
+        f_list = os.listdir(jpg_path)
         for filename in f_list:
             # read image
-            img = cv2.imread(self.JpgPath + filename)
+            img = cv2.imread(jpg_path + filename)
             # convert to gray, and threshold
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             th, threshed = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
