@@ -111,12 +111,12 @@ class MaterialFactory:
         mat = bpy.data.materials.new(name)
         mat.use_nodes = True
         bsdf_node = mat.node_tree.nodes['Principled BSDF']
-        mat.node_tree.nodes.remove(bsdf_node)
-        color_node = mat.node_tree.nodes.new(type='ShaderNodeRGB')
-        color_node.outputs[0].default_value = self.hex2rgba(self.color)
-        output_node = mat.node_tree.nodes['Material Output']
-        mat.node_tree.links.new(
-            color_node.outputs['Color'], output_node.inputs['Surface'])
+        bsdf_node.inputs['Base Color'].default_value = self.hex2rgba(self.color)
+        bsdf_node.inputs['Roughness'].default_value = 0.0
+        bsdf_node.inputs['Specular'].default_value = 1.0
+        #output_node = mat.node_tree.nodes['Material Output']
+        #mat.node_tree.links.new(
+        #    color_node.outputs['Color'], output_node.inputs['Surface'])
         return mat
 
 
