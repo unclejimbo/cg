@@ -197,7 +197,7 @@ class RenderCore:
         if self.config.show_loops == True:
             # build loop mesh
             if self.config.loop_material is None:
-                self.MaterialFactory.wireframecolor = (0.67, 0.67, 0.67, 1)
+                self.MaterialFactory.wireframecolor = (1.0, 0.5, 0.2, 1)
                 mat = self.MaterialFactory.CreateColoredWireframe()
             else:
                 tmp = self.config.material_filename
@@ -282,8 +282,12 @@ class RenderCore:
                 instance = bpy.data.objects.new(
                     'Singularity Instance ' + str(i), None)
                 instance.location = self.blender_vec(s['position'])
-                instance.scale = (self.config.singularity_scale,
-                                  self.config.singularity_scale, self.config.singularity_scale)
+                scale = 0
+                if s['index'] > 0:
+                    scale = self.config.pole_scale
+                else:
+                    scale = self.config.zero_scale
+                instance.scale = (scale, scale, scale)
                 instance.instance_type = 'COLLECTION'
                 instance.instance_collection = bpy.data.collections['Singularity' + str(
                     s['index'])]
