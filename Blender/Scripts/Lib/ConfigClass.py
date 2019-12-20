@@ -16,7 +16,6 @@ data_path = os.path.dirname(os.path.abspath(__file__)) + '/../../Data/'
 texture_path = data_path + 'Texture/linesxy_145.png'
 envmap_path = data_path + 'HDR/gl-hdr-02.hdr'
 output_path = 'image.png'
-animation_output = './'
 cut_json_name = "cuts.json"
 singularity_json_name = "singularities.json"
 transform_json_name = "transform.json"
@@ -79,7 +78,7 @@ class Config:
                  pole_scale=pole_scale, zero_scale=zero_scale, roughness=roughness, rotation_axis=rotation_axis,
                  cut_mode=cut_mode, show_singularities=show_singularities,
                  show_loops=show_loops, uv_multiply=uv_multiply, uv_add=uv_add, clearcoat=clearcoat,
-                 use_envmap=use_envmap, wireframe_size=wireframe_size, animation_output=animation_output,
+                 use_envmap=use_envmap, wireframe_size=wireframe_size,
                  material_filename=material_filename, wireframe_color=wireframe_color,
                  singularity_material=singularity_material, edge_material=edge_material, model_color=model_color,
                  loop_material=loop_material, singular_face_material=singular_face_material,
@@ -103,6 +102,7 @@ class Config:
         self.rotation_step = rotation_step
         self.edge_scale = edge_scale
         self.zero_scale = zero_scale
+        self.pole_scale = pole_scale
         self.roughness = roughness
         self.rotation_axis = rotation_axis
         self.cut_mode = cut_mode
@@ -113,7 +113,6 @@ class Config:
         self.clearcoat = clearcoat
         self.use_envmap = use_envmap
         self.wireframe_size = wireframe_size
-        self.animation_output = animation_output
         self.material_filename = material_filename
         self.wireframe_color = wireframe_color
         self.singularity_material = singularity_material
@@ -158,7 +157,6 @@ class Config:
         config_dict['clearcoat'] = self.clearcoat
         config_dict['use_envmap'] = self.use_envmap
         config_dict['wireframe_size'] = self.wireframe_size
-        config_dict['animation_output'] = self.animation_output
         config_dict['material_filename'] = self.material_filename
         config_dict['wireframe_color'] = self.wireframe_color
         config_dict['singularity_material'] = self.singularity_material

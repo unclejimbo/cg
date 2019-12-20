@@ -73,6 +73,7 @@ class MaterialFactory:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
+        path = os.path.dirname(path)
         filename = path + "/Data/Materials/" + "55-tomato-material-modified.blend"
         with bpy.data.libraries.load(filename, link=False) as (src, dst):
             dst.materials = src.materials
@@ -510,6 +511,7 @@ class MaterialFactory:
 
     def CreateFromFile(self):
         path = os.getcwd()
+        path = os.path.dirname(path)
         path = os.path.dirname(path)
         path = os.path.dirname(path)
         filename = path + "/Data/Materials/" + self.material_filename

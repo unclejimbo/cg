@@ -10,16 +10,12 @@ class TaskImageVideo():
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
+        path = os.path.dirname(path)
         self.ImageInput = path + "/Output/"
         self.PngPath = self.ImageInput + "Png/"
         self.JpgPath = self.ImageInput + "Jpg/"
         self.CropPath = self.ImageInput + "Crop/"
         self.VideoOutput = self.ImageInput + "video/"
-        # self.PngPath = path + "\Output\\Png\\"
-        # self.JpgPath = path + "\Output\\Jpg\\"
-        # self.CropPath = path + "\Output\\Crop\\"
-        # self.VideoOutput = path + "\Output\\video\\"
-
         self.VideoName = 'result'
         self.ffmpegPath = 'D://FFmpeg/ffmpeg/bin/ffmpeg.exe'
         self.framerate = 2
@@ -131,8 +127,9 @@ class TaskImageVideo():
         writer.close()
         print("write done")
 
-    def ProduceComposedVideo(self, path1, path2, output_path):
+    def ProduceCompositeVideo(self, path1, path2, output_path):
         f_list1 = os.listdir(path1)
+        f_list1.sort(key=lambda a: os.stat(path1 + "/" + a).st_ctime)
         f_list2 = os.listdir(path2)
         count = 0
         if not os.path.exists(output_path):

@@ -176,7 +176,6 @@ class RenderCore:
         mesh_obj.active_material = mat
 
         # rotate
-        # mesh_obj.rotation_euler.rotate_axis("Y", self.rotation)
         if self.config.show_singularities == True:
             # build singular faces
             # set material
@@ -445,6 +444,7 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
+            path = os.path.dirname(path)
             filename = path + "/Data/Materials/predefined/predefined.blend"
             with bpy.data.libraries.load(filename) as (src, dst):
                 dst.objects = src.objects
@@ -472,6 +472,7 @@ class RenderCore:
         path = os.getcwd()
         path = os.path.dirname(path)
         path = os.path.dirname(path)
+        path = os.path.dirname(path)
         filename = path + "/Data/Materials/predefined/predefined.blend"
         with bpy.data.libraries.load(filename) as (src, dst):
             dst.objects = src.objects
@@ -490,6 +491,7 @@ class RenderCore:
 
     def build_direct_light(self):
         path = os.getcwd()
+        path = os.path.dirname(path)
         path = os.path.dirname(path)
         path = os.path.dirname(path)
         filename = path + "/Data/Materials/predefined/predefined.blend"
@@ -528,7 +530,6 @@ class RenderCore:
         objects = bpy.data.objects
         parent_object = objects["Parent Object"]
         parent_object.rotation_mode = 'XYZ'
-        # rotation_object.rotation_euler.rotate_axis("Z", radians(self.rotation))
         parent_object.rotation_euler.rotate_axis(
             self.config.rotation_axis, radians(self.rotation))
 
@@ -574,6 +575,7 @@ class RenderCore:
                 path = os.getcwd()
                 path = os.path.dirname(path)
                 path = os.path.dirname(path)
+                path = os.path.dirname(path)
                 output_path = path + "/Output/" + \
                     scene_list[i].split(".")[0] + ".png"
 
@@ -593,6 +595,7 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
+            path = os.path.dirname(path)
             output_path = path + "/Output/" + \
                 obj_list[i].split(".")[0] + ".png"
             self.config.output_path = output_path
@@ -610,31 +613,24 @@ class RenderCore:
             path = os.getcwd()
             path = os.path.dirname(path)
             path = os.path.dirname(path)
+            path = os.path.dirname(path)
             output_path = path + "/Output/" + \
                 self.config.object_name.split(".")[0] + "_" + material + ".png"
             self.config.output_path = output_path
             self.renderSingle()
 
     def renderRotation(self):
+        prefix = self.config.output_path.split(".png")[0]
         for rotation in np.arange(self.config.rotation_start, self.config.rotation_end, self.config.rotation_step):
-            self.rotation = radians(rotation)
             self.rotation = rotation
-            scenename = os.path.split(self.config.scene_path)[-1]
-            rotation_path = self.config.animation_output + "/Output/" + \
-                scenename + "/Rotation/" + self.config.rotation_axis + "/"
-            if not os.path.exists(rotation_path):
-                os.makedirs(rotation_path)
-            output_path = rotation_path + \
-                self.config.object_name.split(
-                    '.')[0] + ("_rotation_%03d.png" % (rotation))
-            self.config.output_path = output_path
-
+            self.config.output_path = prefix + "_rotation_%03d"%(rotation)
             self.buildOnly()
             self.build_rotation()
             self.do_render()
 
     def renderRotationAnimation(self):
         path = os.getcwd()
+        path = os.path.dirname(path)
         path = os.path.dirname(path)
         path = os.path.dirname(path)
         output_path = path + "/Output/" + \
