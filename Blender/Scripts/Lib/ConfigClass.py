@@ -39,7 +39,8 @@ sheen = 0.0
 clearcoat = 0.0
 
 # singularities
-singularity_scale = 0.015
+pole_scale = 0.005
+zero_scale = 0.005
 singularity_material = None
 edge_scale = 0.002
 edge_material = None
@@ -75,7 +76,7 @@ class Config:
                  width=width, height=height, mode=mode, sheen=sheen,
                  object_name=object_name, material=material, plane=plane, rotation_start=rotation_start,
                  rotation_end=rotation_end, rotation_step=rotation_step, edge_scale=edge_scale,
-                 singularity_scale=singularity_scale, roughness=roughness, rotation_axis=rotation_axis,
+                 pole_scale=pole_scale, zero_scale=zero_scale, roughness=roughness, rotation_axis=rotation_axis,
                  cut_mode=cut_mode, show_singularities=show_singularities,
                  show_loops=show_loops, uv_multiply=uv_multiply, uv_add=uv_add, clearcoat=clearcoat,
                  use_envmap=use_envmap, wireframe_size=wireframe_size, animation_output=animation_output,
@@ -101,7 +102,7 @@ class Config:
         self.rotation_end = rotation_end
         self.rotation_step = rotation_step
         self.edge_scale = edge_scale
-        self.singularity_scale = singularity_scale
+        self.zero_scale = zero_scale
         self.roughness = roughness
         self.rotation_axis = rotation_axis
         self.cut_mode = cut_mode
@@ -145,7 +146,8 @@ class Config:
         config_dict['rotation_end'] = self.rotation_end
         config_dict['rotation_step'] = self.rotation_step
         config_dict['edge_scale'] = self.edge_scale
-        config_dict['singularity_scale'] = self.singularity_scale
+        config_dict['pole_scale'] = self.pole_scale
+        config_dict['zero_scale'] = self.zero_scale
         config_dict['roughness'] = self.roughness
         config_dict['rotation_axis'] = self.rotation_axis
         config_dict['cut_mode'] = self.cut_mode
