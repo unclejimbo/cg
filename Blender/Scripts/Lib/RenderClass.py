@@ -145,7 +145,7 @@ class RenderCore:
         mesh_obj.name = 'Mesh'
         # set material
         mat = self.choose_material()
-        if self.config.material == "original":
+        if self.config.material == "original" or self.config.material == 'wireframe':
             img_node = mat.node_tree.nodes['Image Texture']
             texcoord_node = mat.node_tree.nodes.new(type='ShaderNodeTexCoord')
             mutiply_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
@@ -163,7 +163,7 @@ class RenderCore:
                 mutiply_node.outputs['Vector'], add_node.inputs[0])
             mat.node_tree.links.new(
                 add_node.outputs['Vector'], img_node.inputs['Vector'])
-        if self.config.material_filename == "99-porcelain-texture.blend":
+        if self.config.material_filename == "99-porcelain-texture.blend" or self.config.material_filename == 'Knittr.blend':
             # set texture
             mat.node_tree.nodes['Image Texture'].image = bpy.data.images.load(
                 filepath=self.config.texture_path)

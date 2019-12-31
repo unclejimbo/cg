@@ -517,6 +517,10 @@ class MaterialFactory:
         filename = path + "/Data/Materials/" + self.material_filename
         with bpy.data.libraries.load(filename, link=False) as (src, dst):
             dst.materials = src.materials
-        return dst.materials[0]
+        if self.material_filename == 'Knittr.blend':
+            print(dst.materials)
+            return dst.materials[2]
+        else:
+            return dst.materials[0]
 
 
