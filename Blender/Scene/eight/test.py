@@ -1,1 +1,0 @@
-.\blender.exe  -P  D:\Research\Quadratic\HarmonicFoliation\tools\render.py -s D:\Research\Test\eight -o D:\Research\Test\eight
