@@ -19,6 +19,7 @@ output_path = 'image.png'
 cut_json_name = "cuts.json"
 singularity_json_name = "singularities.json"
 transform_json_name = "transform.json"
+trace_json_name = "traceLines.json"
 object_name = "mesh.obj"
 
 # renderer
@@ -41,8 +42,6 @@ clearcoat = 0.0
 pole_scale = 0.005
 zero_scale = 0.005
 singularity_material = None
-edge_scale = 0.002
-edge_material = None
 singular_face_material = None
 show_singularities = True
 show_singularity_color = False
@@ -53,6 +52,11 @@ show_loops = False
 
 # cuts
 cut_mode = 'Segment'
+edge_scale = 0.002
+edge_material = None
+
+# trace lines
+trace_scale = 0.001
 
 # texcoords
 uv_multiply = (1.5, 1.5)
@@ -82,7 +86,8 @@ class Config:
                  material_filename=material_filename, wireframe_color=wireframe_color,
                  singularity_material=singularity_material, edge_material=edge_material, model_color=model_color,
                  loop_material=loop_material, singular_face_material=singular_face_material,
-                 cut_json_name=cut_json_name, singularity_json_name=singularity_json_name,
+                 trace_scale=trace_scale,
+                 cut_json_name=cut_json_name, singularity_json_name=singularity_json_name, trace_json_name=trace_json_name,
                  transform_json_name=transform_json_name, specular=specular, show_singularity_color=show_singularity_color):
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
@@ -120,8 +125,10 @@ class Config:
         self.model_color = model_color
         self.loop_material = loop_material
         self.singular_face_material = singular_face_material
+        self.trace_scale = trace_scale
         self.cut_json_name = cut_json_name
         self.singularity_json_name = singularity_json_name
+        self.trace_json_name = trace_json_name
         self.transform_json_name = transform_json_name
         self.specular = specular
         self.show_singularity_color = show_singularity_color
@@ -164,8 +171,10 @@ class Config:
         config_dict['model_color'] = self.model_color
         config_dict['loop_material'] = self.loop_material
         config_dict['singular_face_material'] = self.singular_face_material
+        config_dict['trace_scale'] = self.trace_scale
         config_dict['cut_json_name'] = self.cut_json_name
         config_dict['singularity_json_name'] = self.singularity_json_name
+        config_dict['trace_json_name'] = self.trace_json_name
         config_dict['transform_json_name'] = self.transform_json_name
         config_dict['specular'] = self.specular
         config_dict['show_singularity_color'] = self.show_singularity_color
