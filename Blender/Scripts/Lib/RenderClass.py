@@ -196,8 +196,12 @@ class RenderCore:
                 mat = self.MaterialFactory.CreateFromFile()
                 self.MaterialFactory.material_filename = tmp
 
-            bpy.ops.import_scene.obj(
-                filepath=self.config.scene_path + "singularFaces.obj", use_split_objects=False)
+            if self.config.object_name[-3:] == 'obj':
+                bpy.ops.import_scene.obj(
+                    filepath=self.config.scene_path + "singularFaces.obj", use_split_objects=False)
+            else:
+                bpy.ops.import_mesh.ply(
+                    filepath=self.config.scene_path + 'singularFaces.ply')
             face_obj = bpy.data.objects["singularFaces"]
             face_obj.name = 'Singular Faces'
             face_obj.active_material = mat
