@@ -292,19 +292,21 @@ class RenderCore:
             self.MaterialFactory.color = color
             mat = self.MaterialFactory.CreateColored(name)
 
+            cylinder_name = name + ' Cylinder'
             bpy.ops.mesh.primitive_cylinder_add()
             cylinder = bpy.data.objects['Cylinder']
-            cylinder.name = name
+            cylinder.name = cylinder_name
             cylinder.active_material = mat
-            edge_collection = bpy.data.collections.new(name)
+            edge_collection = bpy.data.collections.new(cylinder_name)
             edge_collection.objects.link(cylinder)
             scene_collection.objects.unlink(cylinder)
 
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4)
+            sphere_name = name + ' Sphere'
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3)
             sphere = bpy.data.objects['Icosphere']
-            sphere.name = name
+            sphere.name = sphere_name
             sphere.active_material = mat
-            vertex_collection = bpy.data.collections.new(name)
+            vertex_collection = bpy.data.collections.new(sphere_name)
             vertex_collection.objects.link(sphere)
             scene_collection.objects.unlink(sphere)
 
@@ -312,9 +314,11 @@ class RenderCore:
         if not self.config.show_trace_lines:
             return
         if primal:
-            instance_collection = bpy.data.collections['Primal Trace']
+            cylinder_collection = bpy.data.collections['Primal Trace Cylinder']
+            sphere_collection = bpy.data.collections['Primal Trace Sphere']
         else:
-            instance_collection = bpy.data.collections['Conjugate Trace']
+            cylinder_collection = bpy.data.collections['Conjugate Trace Cylinder']
+            sphere_collection = bpy.data.collections['Conjugate Trace Sphere']
         for i in range(0, len(lines), 2):
             p0 = mathutils.Vector(self.blender_vec(lines[i]))
             p1 = mathutils.Vector(self.blender_vec(lines[i + 1]))
@@ -328,7 +332,7 @@ class RenderCore:
             edge_instance.rotation_quaternion = mathutils.Vector(
                 (0, 0, 1)).rotation_difference(p0 - p1)
             edge_instance.instance_type = 'COLLECTION'
-            edge_instance.instance_collection = instance_collection
+            edge_instance.instance_collection = cylinder_collection
             bpy.data.collections['Trace Lines'].objects.link(edge_instance)
 
             vertex_instance = bpy.data.objects.new(
@@ -337,7 +341,7 @@ class RenderCore:
             vertex_instance.scale = (
                 self.config.trace_scale, self.config.trace_scale, self.config.trace_scale)
             vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = instance_collection
+            vertex_instance.instance_collection = sphere_collection
             bpy.data.collections['Trace Lines'].objects.link(vertex_instance)
 
         if len(lines) > 0:
@@ -348,7 +352,7 @@ class RenderCore:
             vertex_instance.scale = (
                 self.config.trace_scale, self.config.trace_scale, self.config.trace_scale)
             vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = instance_collection
+            vertex_instance.instance_collection = sphere_collection
             bpy.data.collections['Trace Lines'].objects.link(vertex_instance)
 
     def build_addons(self):
@@ -482,7 +486,9 @@ class RenderCore:
                     or 'Cut Edge Instance' in objects[i].name \
                     or 'Singularity Instance' in objects[i].name \
                     or 'Loops' in objects[i].name \
-                    or 'Singular Faces' in objects[i].name:
+                    or 'Singular Faces' in objects[i].name \
+                    or 'Trace Vertex Instance' in objects[i].name \
+                    or 'Trace Edge Instance' in objects[i].name:
                 objects[i].parent = parent_object
         objects['Mesh'].parent = parent_object
 
@@ -740,7 +746,9 @@ class RenderCore:
                     or 'Cut Edge Instance' in objects[i].name \
                     or 'Singularity Instance' in objects[i].name \
                     or 'Loops' in objects[i].name \
-                    or 'Singular Faces' in object[i].name:
+                    or 'Singular Faces' in object[i].name \
+                    or 'Trace Vertex Instance' in objects[i].name \
+                    or 'Trace Edge Instance' in objects[i].name:
                 objects[i].parent = rotation_object
         objects['Mesh'].parent = rotation_object
         rotation_object.rotation_mode = 'XYZ'
