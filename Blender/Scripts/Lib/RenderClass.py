@@ -285,7 +285,8 @@ class RenderCore:
     def build_trace_primitives(self):
         scene_collection = bpy.context.collection
         names = ['Primal Trace', 'Conjugate Trace']
-        colors = [0xff0000, 0x00ff00]
+        colors = [self.config.primal_trace_color,
+                  self.config.conjugate_trace_color]
 
         for name, color in zip(names, colors):
             self.MaterialFactory.color = color
@@ -308,6 +309,8 @@ class RenderCore:
             scene_collection.objects.unlink(sphere)
 
     def build_trace_lines(self, lines, primal):
+        if not self.config.show_trace_lines:
+            return
         if primal:
             instance_collection = bpy.data.collections['Primal Trace']
         else:

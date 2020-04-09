@@ -10,6 +10,9 @@ segment_colors = [0x800000, 0xD2691E, 0x808000, 0x008080, 0x000080,
                   0x00FFFF, 0x0000FF, 0x800080, 0xFF00FF, 0x808080,
                   0xFFC0CB, 0xFFDA89, 0xF5F5DC, 0xF5FFFA, 0xE6E6FA]
 
+primal_trace_color = 0xFF0000
+conjugate_trace_color = 0x00FF00
+
 # paths
 scene_path = './'
 data_path = os.path.dirname(os.path.abspath(__file__)) + '/../../Data/'
@@ -57,6 +60,7 @@ edge_material = None
 
 # trace lines
 trace_scale = 0.001
+show_trace_lines = True
 
 # texcoords
 uv_multiply = (1.5, 1.5)
@@ -86,7 +90,8 @@ class Config:
                  material_filename=material_filename, wireframe_color=wireframe_color,
                  singularity_material=singularity_material, edge_material=edge_material, model_color=model_color,
                  loop_material=loop_material, singular_face_material=singular_face_material,
-                 trace_scale=trace_scale,
+                 primal_trace_color=primal_trace_color, conjugate_trace_color=conjugate_trace_color,
+                 trace_scale=trace_scale, show_trace_lines=show_trace_lines,
                  cut_json_name=cut_json_name, singularity_json_name=singularity_json_name, trace_json_name=trace_json_name,
                  transform_json_name=transform_json_name, specular=specular, show_singularity_color=show_singularity_color):
         self.singular_colors = singular_colors
@@ -125,7 +130,10 @@ class Config:
         self.model_color = model_color
         self.loop_material = loop_material
         self.singular_face_material = singular_face_material
+        self.primal_trace_color = primal_trace_color
+        self.conjugate_trace_color = conjugate_trace_color
         self.trace_scale = trace_scale
+        self.show_trace_lines = show_trace_lines
         self.cut_json_name = cut_json_name
         self.singularity_json_name = singularity_json_name
         self.trace_json_name = trace_json_name
@@ -171,7 +179,10 @@ class Config:
         config_dict['model_color'] = self.model_color
         config_dict['loop_material'] = self.loop_material
         config_dict['singular_face_material'] = self.singular_face_material
+        config_dict['primal_trace_color'] = self.primal_trace_color
+        config_dict['conjugate_trace_color'] = self.conjugate_trace_color
         config_dict['trace_scale'] = self.trace_scale
+        config_dict['show_trace_lines'] = self.show_trace_lines
         config_dict['cut_json_name'] = self.cut_json_name
         config_dict['singularity_json_name'] = self.singularity_json_name
         config_dict['trace_json_name'] = self.trace_json_name
