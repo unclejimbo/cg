@@ -3,6 +3,7 @@ import json
 import math
 import mathutils
 import os
+import time
 from math import radians
 import bmesh
 from mathutils import Matrix, Euler, Vector
@@ -150,6 +151,7 @@ class RenderCore:
                 filepath=path, use_split_objects=False, axis_forward='Y', axis_up='Z')
 
         mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
+        mesh_obj.parent = self.parent_object
         mesh_obj.name = 'Mesh'
         # set material
         mat = self.choose_material()
@@ -216,9 +218,14 @@ class RenderCore:
                 mat = self.MaterialFactory.CreateFromFile()
                 self.MaterialFactory.material_filename = tmp
 
-            bpy.ops.import_scene.obj(
-                filepath=self.config.scene_path + "loops.obj", use_split_objects=False)
+            if self.config.object_name[-3:] == 'obj':
+                bpy.ops.import_scene.obj(
+                    filepath=self.config.scene_path + "loops.obj", use_split_objects=False)
+            else:
+                bpy.ops.import_mesh.ply(
+                    filepath=self.config.scene_path + 'loops.ply')
             loop_obj = bpy.data.objects["loops"]
+            loop_obj.parent = self.parent_object
             loop_obj.name = 'Loops'
             loop_obj.active_material = mat
 
@@ -310,50 +317,23 @@ class RenderCore:
             vertex_collection.objects.link(sphere)
             scene_collection.objects.unlink(sphere)
 
-    def build_trace_lines(self, lines, primal):
-        if not self.config.show_trace_lines:
-            return
-        if primal:
-            cylinder_collection = bpy.data.collections['Primal Trace Cylinder']
-            sphere_collection = bpy.data.collections['Primal Trace Sphere']
-        else:
-            cylinder_collection = bpy.data.collections['Conjugate Trace Cylinder']
-            sphere_collection = bpy.data.collections['Conjugate Trace Sphere']
-        for i in range(0, len(lines), 2):
-            p0 = mathutils.Vector(self.blender_vec(lines[i]))
-            p1 = mathutils.Vector(self.blender_vec(lines[i + 1]))
+    def build_trace_lines(self, lines, name, color):
+        self.MaterialFactory.color = color
+        mat = self.MaterialFactory.CreateColored(name)
 
-            edge_instance = bpy.data.objects.new(
-                'Trace Edge Instance' + str(i), None)
-            edge_instance.location = (p0 + p1) / 2
-            edge_instance.scale = (
-                self.config.trace_scale, self.config.trace_scale, (p0 - p1).magnitude / 2)
-            edge_instance.rotation_mode = 'QUATERNION'
-            edge_instance.rotation_quaternion = mathutils.Vector(
-                (0, 0, 1)).rotation_difference(p0 - p1)
-            edge_instance.instance_type = 'COLLECTION'
-            edge_instance.instance_collection = cylinder_collection
-            bpy.data.collections['Trace Lines'].objects.link(edge_instance)
+        curves = bpy.data.curves.new(name, 'CURVE')
+        curves.dimensions = '3D'
+        curves.bevel_depth = self.config.trace_scale
+        for line in lines:
+            polyline = curves.splines.new('POLY')
+            polyline.points.add(len(line) - 1)
+            for i, p in enumerate(line):
+                polyline.points[i].co = (p[0], p[1], p[2], 1)
 
-            vertex_instance = bpy.data.objects.new(
-                'Trace Vertex Instance' + str(i), None)
-            vertex_instance.location = p0
-            vertex_instance.scale = (
-                self.config.trace_scale, self.config.trace_scale, self.config.trace_scale)
-            vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = sphere_collection
-            bpy.data.collections['Trace Lines'].objects.link(vertex_instance)
-
-        if len(lines) > 0:
-            vertex_instance = bpy.data.objects.new(
-                'Trace Vertex Instance -1', None)
-            vertex_instance.location = mathutils.Vector(
-                self.blender_vec(lines[-1]))
-            vertex_instance.scale = (
-                self.config.trace_scale, self.config.trace_scale, self.config.trace_scale)
-            vertex_instance.instance_type = 'COLLECTION'
-            vertex_instance.instance_collection = sphere_collection
-            bpy.data.collections['Trace Lines'].objects.link(vertex_instance)
+        tracelines = bpy.data.objects.new(name, curves)
+        tracelines.parent = self.parent_object
+        tracelines.active_material = mat
+        bpy.data.collections['Trace Lines'].objects.link(tracelines)
 
     def build_addons(self):
         scene_collection = bpy.context.scene.collection
@@ -365,6 +345,7 @@ class RenderCore:
             if s['type'] == 'vertex':
                 instance = bpy.data.objects.new(
                     'Singularity Instance ' + str(i), None)
+                instance.parent = self.parent_object
                 instance.location = self.blender_vec(s['position'])
                 scale = 0
                 if s['index'] > 0:
@@ -388,6 +369,7 @@ class RenderCore:
 
             edge_instance = bpy.data.objects.new(
                 'Cut Edge Instance ' + str(i), None)
+            edge_instance.parent = self.parent_object
             edge_instance.location = (p0 + p1) / 2
             edge_instance.scale = (
                 self.config.edge_scale, self.config.edge_scale, (p0 - p1).magnitude / 2)
@@ -415,6 +397,7 @@ class RenderCore:
 
             vertex_instance = bpy.data.objects.new(
                 'Cut Vertex Instance ' + str(i * 2), None)
+            vertex_instance.parent = self.parent_object
             vertex_instance.location = p0
             vertex_instance.scale = (
                 self.config.edge_scale, self.config.edge_scale, self.config.edge_scale)
@@ -441,6 +424,7 @@ class RenderCore:
                 cuts_collection.objects.link(vertex_instance)
             vertex_instance = bpy.data.objects.new(
                 'Cut Vertex Instance ' + str(i * 2 + 1), None)
+            vertex_instance.parent = self.parent_object
             vertex_instance.location = p1
             vertex_instance.scale = (
                 self.config.edge_scale, self.config.edge_scale, self.config.edge_scale)
@@ -469,28 +453,19 @@ class RenderCore:
         # trace lines
         trace_collection = bpy.data.collections.new('Trace Lines')
         scene_collection.children.link(trace_collection)
-        self.build_trace_lines(self.trace_json['primalTraceLines'], True)
         self.build_trace_lines(
-            self.trace_json['primalCriticalTraceLines'], True)
-        self.build_trace_lines(self.trace_json['conjugateTraceLines'], False)
+            self.trace_json['primalTraceLines'], 'Primal trace', self.config.primal_trace_color)
         self.build_trace_lines(
-            self.trace_json['conjugateCriticalTraceLines'], False)
+            self.trace_json['primalCriticalTraceLines'], 'Primal critical trace', self.config.primal_trace_color)
+        self.build_trace_lines(
+            self.trace_json['conjugateTraceLines'], 'Conjugate trace', self.config.conjugate_trace_color)
+        self.build_trace_lines(
+            self.trace_json['conjugateCriticalTraceLines'], 'Conjugate critical trace', self.config.conjugate_trace_color)
 
     def build_parent_object(self):
-        objects = bpy.data.objects
-        parent_object = bpy.data.objects.new("Parent Object", None)
-        parent_object.rotation_mode = 'XYZ'
-        bpy.context.scene.collection.objects.link(parent_object)
-        for i in range(0, len(objects)):
-            if 'Cut Vertex Instance' in objects[i].name \
-                    or 'Cut Edge Instance' in objects[i].name \
-                    or 'Singularity Instance' in objects[i].name \
-                    or 'Loops' in objects[i].name \
-                    or 'Singular Faces' in objects[i].name \
-                    or 'Trace Vertex Instance' in objects[i].name \
-                    or 'Trace Edge Instance' in objects[i].name:
-                objects[i].parent = parent_object
-        objects['Mesh'].parent = parent_object
+        self.parent_object = bpy.data.objects.new("Parent Object", None)
+        self.parent_object.rotation_mode = 'XYZ'
+        bpy.context.scene.collection.objects.link(self.parent_object)
 
         transform_json = os.path.join(
             self.config.scene_path, self.config.transform_json_name)
@@ -500,9 +475,9 @@ class RenderCore:
                 transform = json.load(load_f)
             # set transform
             for i in range(3):
-                parent_object.location[i] = transform['Location'][i]
-                parent_object.rotation_euler[i] = transform['Rotation'][i]
-                parent_object.scale[i] = transform['Scale'][i]
+                self.parent_object.location[i] = transform['Location'][i]
+                self.parent_object.rotation_euler[i] = transform['Rotation'][i]
+                self.parent_object.scale[i] = transform['Scale'][i]
 
     def build_ground(self):
         objects = bpy.data.objects
@@ -640,12 +615,15 @@ class RenderCore:
         self.clean()
         self.setup_renderer(self.config.output_path,
                             self.config.width, self.config.height)
+        self.build_parent_object()
         self.build_main_mesh(self.config.scene_path + self.config.object_name)
         self.build_singularity_primitives()
         self.build_segment_primitives()
         self.build_trace_primitives()
+        t1 = time.time()
         self.build_addons()
-        self.build_parent_object()
+        t2 = time.time()
+        print('Build addons', t2 - t1)
         self.build_ground()
         self.build_camera()
         self.build_direct_light()
