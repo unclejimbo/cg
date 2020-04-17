@@ -3,7 +3,6 @@ import json
 import math
 import mathutils
 import os
-import time
 from math import radians
 import bmesh
 from mathutils import Matrix, Euler, Vector
@@ -286,34 +285,6 @@ class RenderCore:
             sphere.active_material = mat
             vertex_collection = bpy.data.collections.new(
                 'Cut Vertex Segment ' + str(i))
-            vertex_collection.objects.link(sphere)
-            scene_collection.objects.unlink(sphere)
-
-    def build_trace_primitives(self):
-        scene_collection = bpy.context.collection
-        names = ['Primal Trace', 'Conjugate Trace']
-        colors = [self.config.primal_trace_color,
-                  self.config.conjugate_trace_color]
-
-        for name, color in zip(names, colors):
-            self.MaterialFactory.color = color
-            mat = self.MaterialFactory.CreateColored(name)
-
-            cylinder_name = name + ' Cylinder'
-            bpy.ops.mesh.primitive_cylinder_add()
-            cylinder = bpy.data.objects['Cylinder']
-            cylinder.name = cylinder_name
-            cylinder.active_material = mat
-            edge_collection = bpy.data.collections.new(cylinder_name)
-            edge_collection.objects.link(cylinder)
-            scene_collection.objects.unlink(cylinder)
-
-            sphere_name = name + ' Sphere'
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3)
-            sphere = bpy.data.objects['Icosphere']
-            sphere.name = sphere_name
-            sphere.active_material = mat
-            vertex_collection = bpy.data.collections.new(sphere_name)
             vertex_collection.objects.link(sphere)
             scene_collection.objects.unlink(sphere)
 
@@ -619,11 +590,7 @@ class RenderCore:
         self.build_main_mesh(self.config.scene_path + self.config.object_name)
         self.build_singularity_primitives()
         self.build_segment_primitives()
-        self.build_trace_primitives()
-        t1 = time.time()
         self.build_addons()
-        t2 = time.time()
-        print('Build addons', t2 - t1)
         self.build_ground()
         self.build_camera()
         self.build_direct_light()
