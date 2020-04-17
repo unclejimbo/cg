@@ -62,6 +62,10 @@ edge_material = None
 trace_scale = 0.001
 show_trace_lines = True
 
+# foliation graph
+show_foliation_graph = True
+foliation_graph_color = 0x00FFFF
+
 # texcoords
 uv_multiply = (1.5, 1.5)
 uv_add = (0.05, 0.05)
@@ -92,6 +96,7 @@ class Config:
                  loop_material=loop_material, singular_face_material=singular_face_material,
                  primal_trace_color=primal_trace_color, conjugate_trace_color=conjugate_trace_color,
                  trace_scale=trace_scale, show_trace_lines=show_trace_lines,
+                 show_foliation_graph=show_foliation_graph, foliation_graph_color=foliation_graph_color,
                  cut_json_name=cut_json_name, singularity_json_name=singularity_json_name, trace_json_name=trace_json_name,
                  transform_json_name=transform_json_name, specular=specular, show_singularity_color=show_singularity_color):
         self.singular_colors = singular_colors
@@ -140,6 +145,8 @@ class Config:
         self.transform_json_name = transform_json_name
         self.specular = specular
         self.show_singularity_color = show_singularity_color
+        self.show_foliation_graph = show_foliation_graph
+        self.foliation_graph_color = foliation_graph_color
 
     def save_config(self, file_path):
         config_dict = {}
@@ -189,6 +196,8 @@ class Config:
         config_dict['transform_json_name'] = self.transform_json_name
         config_dict['specular'] = self.specular
         config_dict['show_singularity_color'] = self.show_singularity_color
+        config_dict['show_foliation_graph'] = self.show_foliation_graph
+        config_dict['foliation_graph_color'] = self.foliation_graph_color
 
         with open(file_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)

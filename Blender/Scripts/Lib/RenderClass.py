@@ -184,8 +184,9 @@ class RenderCore:
             mat.node_tree.nodes['Vector Math.001'].inputs[1].default_value[1] = self.config.uv_multiply[1]
         mesh_obj.active_material = mat
 
+    def build_singular_faces(self):
         # rotate
-        if self.config.show_singularities == True:
+        if self.config.show_singularities:
             # build singular faces
             # set material
             if self.config.singular_face_material is None:
@@ -206,7 +207,9 @@ class RenderCore:
             face_obj = bpy.data.objects["singularFaces"]
             face_obj.name = 'Singular Faces'
             face_obj.active_material = mat
-        if self.config.show_loops == True:
+
+    def build_loops(self):
+        if self.config.show_loops:
             # build loop mesh
             if self.config.loop_material is None:
                 self.MaterialFactory.wireframecolor = (1.0, 0.5, 0.2, 1)
@@ -227,6 +230,29 @@ class RenderCore:
             loop_obj.parent = self.parent_object
             loop_obj.name = 'Loops'
             loop_obj.active_material = mat
+
+    def build_foliation_graph(self):
+        if self.config.show_foliation_graph:
+            if self.config.object_name[-3:] == 'obj':
+                path = os.path.join(self.config.scene_path,
+                                    'foliationGraph.obj')
+                if not os.path.exists(path):
+                    return
+                bpy.ops.import_scene.obj(
+                    filepath=path, use_split_objects=False)
+            else:
+                path = os.path.join(self.config.scene_path,
+                                    'foliationGraph.ply')
+                if not os.path.exists(path):
+                    return
+                bpy.ops.import_mesh.ply(filepath=path)
+
+            self.MaterialFactory.wireframecolor = (0.0, 1.0, 1.0, 1.0)
+            mat = self.MaterialFactory.CreateColoredWireframe()
+            obj = bpy.data.objects['foliationGraph']
+            obj.parent = self.parent_object
+            obj.name = 'Foliation Graph'
+            obj.active_material = mat
 
     def build_singularity_primitives(self):
         scene_collection = bpy.context.scene.collection
@@ -588,6 +614,9 @@ class RenderCore:
                             self.config.width, self.config.height)
         self.build_parent_object()
         self.build_main_mesh(self.config.scene_path + self.config.object_name)
+        self.build_singular_faces()
+        self.build_loops()
+        self.build_foliation_graph()
         self.build_singularity_primitives()
         self.build_segment_primitives()
         self.build_addons()
