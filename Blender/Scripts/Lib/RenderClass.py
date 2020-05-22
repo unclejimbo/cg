@@ -475,16 +475,17 @@ class RenderCore:
                 cuts_collection.objects.link(vertex_instance)
 
         # trace lines
-        trace_collection = bpy.data.collections.new('Trace Lines')
-        scene_collection.children.link(trace_collection)
-        self.build_trace_lines(
-            self.trace_json['primalTraceLines'], 'Primal trace', self.config.primal_trace_color)
-        self.build_trace_lines(
-            self.trace_json['primalCriticalTraceLines'], 'Primal critical trace', self.config.primal_trace_color)
-        self.build_trace_lines(
-            self.trace_json['conjugateTraceLines'], 'Conjugate trace', self.config.conjugate_trace_color)
-        self.build_trace_lines(
-            self.trace_json['conjugateCriticalTraceLines'], 'Conjugate critical trace', self.config.conjugate_trace_color)
+        if self.config.show_trace_lines:
+            trace_collection = bpy.data.collections.new('Trace Lines')
+            scene_collection.children.link(trace_collection)
+            self.build_trace_lines(
+                self.trace_json['primalTraceLines'], 'Primal trace', self.config.primal_trace_color)
+            self.build_trace_lines(
+                self.trace_json['primalCriticalTraceLines'], 'Primal critical trace', self.config.primal_trace_color)
+            self.build_trace_lines(
+                self.trace_json['conjugateTraceLines'], 'Conjugate trace', self.config.conjugate_trace_color)
+            self.build_trace_lines(
+                self.trace_json['conjugateCriticalTraceLines'], 'Conjugate critical trace', self.config.conjugate_trace_color)
 
     def build_parent_object(self):
         self.parent_object = bpy.data.objects.new("Parent Object", None)
