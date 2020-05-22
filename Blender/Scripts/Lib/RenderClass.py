@@ -140,20 +140,7 @@ class RenderCore:
             mat = self.MaterialFactory.CreateFromName(self.config.material)
         else:
             mat = self.MaterialFactory.CreateFromFile()
-        return mat
 
-    def build_main_mesh(self, path):
-        if self.config.object_name.split('.')[-1] == 'ply':
-            bpy.ops.import_mesh.ply(filepath=path)
-        else:
-            bpy.ops.import_scene.obj(
-                filepath=path, use_split_objects=False, axis_forward='Y', axis_up='Z')
-
-        mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
-        mesh_obj.parent = self.parent_object
-        mesh_obj.name = 'Mesh'
-        # set material
-        mat = self.choose_material()
         if self.config.material == "original" or self.config.material == 'wireframe':
             img_node = mat.node_tree.nodes['Image Texture']
             texcoord_node = mat.node_tree.nodes.new(type='ShaderNodeTexCoord')
@@ -182,6 +169,24 @@ class RenderCore:
             # Multiply
             mat.node_tree.nodes['Vector Math.001'].inputs[1].default_value[0] = self.config.uv_multiply[0]
             mat.node_tree.nodes['Vector Math.001'].inputs[1].default_value[1] = self.config.uv_multiply[1]
+
+        return mat
+
+    def build_main_mesh(self, path):
+        if self.config.show_cylinders:
+            return
+
+        if self.config.object_name.split('.')[-1] == 'ply':
+            bpy.ops.import_mesh.ply(filepath=path)
+        else:
+            bpy.ops.import_scene.obj(
+                filepath=path, use_split_objects=False, axis_forward='Y', axis_up='Z')
+
+        mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
+        mesh_obj.parent = self.parent_object
+        mesh_obj.name = 'Mesh'
+        # set material
+        mat = self.choose_material()
         mesh_obj.active_material = mat
 
     def build_singular_faces(self):
@@ -253,6 +258,28 @@ class RenderCore:
             obj.parent = self.parent_object
             obj.name = 'Foliation Graph'
             obj.active_material = mat
+
+    def build_cylinders(self):
+        if self.config.show_cylinders:
+            for _, _, files in os.walk(self.config.scene_path):
+                for i, f in enumerate(files):
+                    if f[:8] == 'cylinder':
+                        fpath = os.path.join(self.config.scene_path, f)
+                        if self.config.object_name[-3:] == 'obj':
+                            bpy.ops.import_scene.obj(
+                                filepath=fpath, use_split_objects=False)
+                        else:
+                            bpy.ops.import_mesh.ply(filepath=fpath)
+                        obj = bpy.data.objects[f[:-4]]
+                        obj.parent = self.parent_object
+                        if self.config.cylinder_mode == 'plain':
+                            obj.active_material = self.choose_material()
+                        elif self.config.cylinder_mode == 'colors':
+                            color = self.config.segment_colors[i % len(
+                                self.config.segment_colors)]
+                            self.MaterialFactory.color = color
+                            obj.active_material = self.MaterialFactory.CreateColored(
+                                f[:-4])
 
     def build_singularity_primitives(self):
         scene_collection = bpy.context.scene.collection
@@ -617,6 +644,7 @@ class RenderCore:
         self.build_singular_faces()
         self.build_loops()
         self.build_foliation_graph()
+        self.build_cylinders()
         self.build_singularity_primitives()
         self.build_segment_primitives()
         self.build_addons()

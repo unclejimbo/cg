@@ -66,6 +66,10 @@ show_trace_lines = True
 show_foliation_graph = True
 foliation_graph_color = 0x00FFFF
 
+# cylinder
+show_cylinders = False
+cylinder_mode = 'plain'
+
 # texcoords
 uv_multiply = (1.5, 1.5)
 uv_add = (0.05, 0.05)
@@ -97,6 +101,7 @@ class Config:
                  primal_trace_color=primal_trace_color, conjugate_trace_color=conjugate_trace_color,
                  trace_scale=trace_scale, show_trace_lines=show_trace_lines,
                  show_foliation_graph=show_foliation_graph, foliation_graph_color=foliation_graph_color,
+                 show_cylinders=show_cylinders, cylinder_mode=cylinder_mode,
                  cut_json_name=cut_json_name, singularity_json_name=singularity_json_name, trace_json_name=trace_json_name,
                  transform_json_name=transform_json_name, specular=specular, show_singularity_color=show_singularity_color):
         self.singular_colors = singular_colors
@@ -147,6 +152,8 @@ class Config:
         self.show_singularity_color = show_singularity_color
         self.show_foliation_graph = show_foliation_graph
         self.foliation_graph_color = foliation_graph_color
+        self.show_cylinders = show_cylinders
+        self.cylinder_mode = cylinder_mode
 
     def save_config(self, file_path):
         config_dict = {}
@@ -198,6 +205,8 @@ class Config:
         config_dict['show_singularity_color'] = self.show_singularity_color
         config_dict['show_foliation_graph'] = self.show_foliation_graph
         config_dict['foliation_graph_color'] = self.foliation_graph_color
+        config_dict['show_cylinders'] = self.show_cylinders
+        config_dict['cylinder_mode'] = self.cylinder_mode
 
         with open(file_path, 'w') as dump_f:
             json.dump(config_dict, dump_f)
