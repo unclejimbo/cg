@@ -173,7 +173,7 @@ class RenderCore:
         return mat
 
     def build_main_mesh(self, path):
-        if self.config.show_cylinders:
+        if not self.config.show_main or self.config.show_cylinders:
             return
 
         if self.config.object_name.split('.')[-1] == 'ply':
@@ -262,6 +262,7 @@ class RenderCore:
     def build_cylinders(self):
         if self.config.show_cylinders:
             for _, _, files in os.walk(self.config.scene_path):
+                files.sort()
                 for i, f in enumerate(files):
                     if f[:8] == 'cylinder':
                         fpath = os.path.join(self.config.scene_path, f)
@@ -283,6 +284,7 @@ class RenderCore:
 
     def build_singularity_primitives(self):
         scene_collection = bpy.context.scene.collection
+        singular_collection = bpy.data.collections.new('Singular')
         for index, color in self.config.singular_colors.items():
             if self.config.singularity_material is None:
                 self.MaterialFactory.color = color
@@ -305,7 +307,19 @@ class RenderCore:
             sphere.active_material = mat
             collection = bpy.data.collections.new('Singularity' + index)
             collection.objects.link(sphere)
+            singular_collection.objects.link(sphere)
             scene_collection.objects.unlink(sphere)
+
+        if False:
+            bpy.context.scene.render.use_freestyle = True
+            fs = bpy.context.scene.view_layers['View Layer'].freestyle_settings
+            fs.use_culling = True
+            ls = fs.linesets['LineSet']
+            ls.select_by_image_border = False
+            ls.select_by_collection = True
+            ls.collection = bpy.data.collections['Singular']
+            ls.select_border = False
+            ls.select_contour = True
 
     def build_segment_primitives(self):
         scene_collection = bpy.context.scene.collection
@@ -629,7 +643,7 @@ class RenderCore:
         objects = bpy.data.objects
         parent_object = objects["Parent Object"]
         parent_object.rotation_mode = 'XYZ'
-        parent_object.rotation_euler.rotate_axis(
+        parent_object.delta_rotation_euler.rotate_axis(
             self.config.rotation_axis, radians(self.rotation))
 
     def do_render(self):

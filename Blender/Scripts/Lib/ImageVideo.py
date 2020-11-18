@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import cv2
 import imageio
 
+
 class TaskImageVideo():
     def __init__(self):
         path = os.getcwd()
@@ -38,14 +39,16 @@ class TaskImageVideo():
                 draw = ImageDraw.Draw(img)
                 width, height = img.size
                 font = ImageFont.truetype("arial.ttf", 50)
-                draw.text((100, height-100), os.path.splitext(filename)[0], font=font, fill="#ff0000")
+                draw.text((100, height - 100), os.path.splitext(filename)
+                          [0], font=font, fill="#ff0000")
                 img.save(output_name)
 
                 # save another Jpg file
                 jpg_path = self.ImageInput + "Jpg2/"
                 if not os.path.exists(jpg_path):
                     os.makedirs(jpg_path)
-                output_name_2 = jpg_path + os.path.splitext(filename)[0] + '.jpg'
+                output_name_2 = jpg_path + \
+                    os.path.splitext(filename)[0] + '.jpg'
                 img_rgb = Image.new("RGB", img.size, (255, 255, 255))
                 img_rgb.paste(img, mask=img.split()[3])
                 img_rgb.save(output_name_2)
@@ -67,7 +70,8 @@ class TaskImageVideo():
                 # read image
                 img = Image.open(self.PngPath + filename)
                 # rename
-                output_name = self.JpgPath + os.path.splitext(filename)[0] + '.jpg'
+                output_name = self.JpgPath + \
+                    os.path.splitext(filename)[0] + '.jpg'
                 # conver to jpg
                 img_rgb = Image.new("RGB", img.size, (255, 255, 255))
                 img_rgb.paste(img, mask=img.split()[3])
@@ -95,7 +99,8 @@ class TaskImageVideo():
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
             morphed = cv2.morphologyEx(threshed, cv2.MORPH_CLOSE, kernel)
             # find th max-area contour
-            cnts = cv2.findContours(morphed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+            cnts = cv2.findContours(
+                morphed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
             cnt = sorted(cnts, key=cv2.contourArea)[-1]
             # crop and save it
             x, y, w, h = cv2.boundingRect(cnt)
@@ -109,8 +114,9 @@ class TaskImageVideo():
 
         ### ProduceVideo ###
         cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
-              self.JpgPath + self.input_format + " -c:v libx264" + \
-              " -pix_fmt " + self.pixel_format + " " + self.VideoOutput + self.VideoName + ".mp4"
+            self.JpgPath + self.input_format + " -c:v libx264" + \
+            " -pix_fmt " + self.pixel_format + " " + \
+            self.VideoOutput + self.VideoName + ".mp4"
         os.system(cmd)
         print("write done")
 
@@ -122,7 +128,7 @@ class TaskImageVideo():
         writer = imageio.get_writer(video_path, mode="I", fps=self.framerate)
         f_list = os.listdir(self.JpgPath)
         for i in range(len(f_list)):
-            filename = self.JpgPath + "/" + self.input_format%(i)
+            filename = self.JpgPath + "/" + self.input_format % (i)
             writer.append_data(imageio.imread(filename))
         writer.close()
         print("write done")
@@ -137,21 +143,20 @@ class TaskImageVideo():
         for filename in f_list1:
             if filename in f_list2:
                 # image compose
-                img1 = Image.open(path1+filename)
-                img2 = Image.open(path2+filename)
+                img1 = Image.open(path1 + filename)
+                img2 = Image.open(path2 + filename)
                 size1 = img1.size
                 size2 = img2.size
                 joint = Image.new('RGB', (size1[0] + size2[0], size1[1]))
                 loc1, loc2 = (0, 0), (size1[0], 0)
                 joint.paste(img1, loc1)
                 joint.paste(img2, loc2)
-                output = output_path + "image_%03d"%(count) + ".jpg"
+                output = output_path + "image_%03d" % (count) + ".jpg"
                 joint.save(output)
                 count += 1
         # generate video
         cmd = self.ffmpegPath + " -y -r " + str(self.framerate) + " -i " + \
-              output_path + "image_%03d.jpg" + " -c:v libx264" + \
-              " -pix_fmt " + self.pixel_format + " " + output_path + self.VideoName + ".mp4"
+            output_path + "image_%03d.jpg" + " -c:v libx264" + \
+            " -pix_fmt " + self.pixel_format + " " + output_path + self.VideoName + ".mp4"
         os.system(cmd)
         print("write done")
-

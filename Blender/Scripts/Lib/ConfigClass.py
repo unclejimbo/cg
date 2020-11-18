@@ -2,13 +2,15 @@ import os
 import json
 
 singular_colors = {
-    '-1': 0x00DCFF, '-2': 0x00DCFF, '-3': 0x80DCFF, '1': 0xFFFF00, '2': 0xFFFF00
+    # '-1': 0x00DCFF, '-2': 0x00DCFF, '-3': 0x80DCFF, '1': 0xFFFF00, '2': 0xFFFF00
+    '-1': 0x00FF00, '-2': 0x800080, '-3': 0xFFFFFF, '1': 0xFFA500, '2': 0xFF0000
 }
 
 segment_colors = [0x800000, 0xD2691E, 0x808000, 0x008080, 0x000080,
                   0xFF0000, 0xFFA500, 0xFFFF00, 0x00FF00, 0x008000,
                   0x00FFFF, 0x0000FF, 0x800080, 0xFF00FF, 0x808080,
-                  0xFFC0CB, 0xFFDA89, 0xF5F5DC, 0xF5FFFA, 0xE6E6FA]
+                  0xFFC0CB, 0xFFDA89, 0xF5F5DC, 0xF5FFFA, 0xE6E6FA,
+                  0x000000, 0xA9A9A9, 0x900C3F, 0x7D5A5A, 0xABC2EB]
 
 primal_trace_color = 0xFF0000
 conjugate_trace_color = 0x00FF00
@@ -33,9 +35,10 @@ plane = "predefined"
 use_envmap = False
 
 # main mesh
+show_main = True
 material = "original"
 material_filename = None
-model_color = (1.0, 1.0, 1.0, 1.0)
+model_color = (0.6, 0.8, 1.0, 1.0)
 roughness = 0.0
 specular = 0.0
 sheen = 0.0
@@ -86,7 +89,7 @@ rotation_axis = "Z"
 
 
 class Config:
-    def __init__(self, singular_colors=singular_colors, segment_colors=segment_colors,
+    def __init__(self, show_main=show_main, singular_colors=singular_colors, segment_colors=segment_colors,
                  texture_path=texture_path, envmap_path=envmap_path, scene_path=scene_path, output_path=output_path,
                  width=width, height=height, mode=mode, sheen=sheen,
                  object_name=object_name, material=material, plane=plane, rotation_start=rotation_start,
@@ -104,6 +107,7 @@ class Config:
                  show_cylinders=show_cylinders, cylinder_mode=cylinder_mode,
                  cut_json_name=cut_json_name, singularity_json_name=singularity_json_name, trace_json_name=trace_json_name,
                  transform_json_name=transform_json_name, specular=specular, show_singularity_color=show_singularity_color):
+        self.show_main = show_main
         self.singular_colors = singular_colors
         self.segment_colors = segment_colors
         self.texture_path = texture_path
@@ -157,6 +161,7 @@ class Config:
 
     def save_config(self, file_path):
         config_dict = {}
+        config_dict['show_main'] = self.show_main
         config_dict['singular_colors'] = self.singular_colors
         config_dict['segment_colors'] = self.segment_colors
         config_dict['texture_path'] = self.texture_path
