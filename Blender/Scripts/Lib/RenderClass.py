@@ -13,16 +13,7 @@ from MaterialFactory import MaterialFactory
 class RenderCore:
     def __init__(self, config):
         self.config = config
-        self.MaterialFactory = MaterialFactory()
-        self.MaterialFactory.texture_path = self.config.texture_path
-        self.MaterialFactory.roughness = self.config.roughness
-        self.MaterialFactory.specular = self.config.specular
-        self.MaterialFactory.sheen = self.config.sheen
-        self.MaterialFactory.clearcoat = self.config.clearcoat
-        self.MaterialFactory.wireframe_size = self.config.wireframe_size
-        self.MaterialFactory.material_filename = self.config.material_filename
-        self.MaterialFactory.wireframe_color = self.config.wireframe_color
-        self.MaterialFactory.model_color = self.config.model_color
+        self.MaterialFactory = MaterialFactory(self.config)
         self.rotation = 0
         self.singularity_json = None
         self.cut_json = None
@@ -31,23 +22,6 @@ class RenderCore:
     def blender_vec(self, vec):
         # return (vec[0], -vec[2], vec[1])
         return (vec[0], vec[1], vec[2])
-
-    def gammaCorrect(self, srgb):
-        if srgb < 0:
-            return 0
-        elif srgb < 0.04045:
-            return srgb / 12.92
-        else:
-            return ((srgb + 0.055) / 1.055) ** 2.4
-
-    def hex2rgba(self, h):
-        b = (h & 0xFF) / 255.0
-        g = ((h >> 8) & 0xFF) / 255.0
-        r = ((h >> 16) & 0xFF) / 255.0
-        linearR = self.gammaCorrect(r)
-        linearG = self.gammaCorrect(g)
-        linearB = self.gammaCorrect(b)
-        return linearR, linearG, linearB, 1.0
 
     def load_json(self):
         cut_json_path = self.config.scene_path + self.config.cut_json_name
@@ -117,59 +91,15 @@ class RenderCore:
             render_node.outputs['Image'], originoutput_node.inputs[0])
 
     def choose_material(self):
-        material_list = ['model_only', 'color_only', 'original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
-                         'peeling_paint', 'paint', 'vertex_color', 'wireframe_only']
-        if self.config.material in material_list and self.config.material_filename is None:
-            material_function = {
-                'model_only': self.MaterialFactory.CreateModelOnly(),
-                'color_only': self.MaterialFactory.CreateColorOnly(),
-                'original': self.MaterialFactory.CreateMain(),
-                'gold': self.MaterialFactory.CreateGold(),
-                'glass': self.MaterialFactory.CreateGlass(),
-                'ceramic': self.MaterialFactory.CreateCeramic(),
-                'roughblue': self.MaterialFactory.CreateRoughBlue(),
-                'wireframe': self.MaterialFactory.CreateWireframe(),
-                'peeling_paint': self.MaterialFactory.CreatePeelingPaint(),
-                'paint': self.MaterialFactory.CreatePaint(),
-                'vertex_color': self.MaterialFactory.CreateVertexColor(),
-                'wireframe_only': self.MaterialFactory.CreateWireframeOnly()
-                # 'vertex_color_cmap' : self.MaterialFactory.CreateVertexColorCmap()
-            }
-            mat = material_function[self.config.material]
-        elif self.config.material_filename is None:
-            mat = self.MaterialFactory.CreateFromName(self.config.material)
+        if self.config.material == 'original':
+            mat = self.MaterialFactory.create_bsdf(
+                self.config.color_mode, self.config.render_style)
+        elif self.config.material == 'named':
+            mat = self.MaterialFactory.create_from_name(
+                self.config.material_filename)
         else:
-            mat = self.MaterialFactory.CreateFromFile()
-
-        if self.config.material == "original" or self.config.material == 'wireframe':
-            img_node = mat.node_tree.nodes['Image Texture']
-            texcoord_node = mat.node_tree.nodes.new(type='ShaderNodeTexCoord')
-            mutiply_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
-            mutiply_node.operation = 'MULTIPLY'
-            mutiply_node.inputs[1].default_value[0] = self.config.uv_multiply[0]
-            mutiply_node.inputs[1].default_value[1] = self.config.uv_multiply[1]
-            add_node = mat.node_tree.nodes.new(type='ShaderNodeVectorMath')
-            add_node.operation = 'ADD'
-            add_node.inputs[1].default_value[0] = self.config.uv_add[0]
-            add_node.inputs[1].default_value[1] = self.config.uv_add[1]
-            # link nodes
-            mat.node_tree.links.new(
-                texcoord_node.outputs['UV'], mutiply_node.inputs[0])
-            mat.node_tree.links.new(
-                mutiply_node.outputs['Vector'], add_node.inputs[0])
-            mat.node_tree.links.new(
-                add_node.outputs['Vector'], img_node.inputs['Vector'])
-        if self.config.material_filename == "99-porcelain-texture.blend" or self.config.material_filename == 'Knittr.blend':
-            # set texture
-            mat.node_tree.nodes['Image Texture'].image = bpy.data.images.load(
-                filepath=self.config.texture_path)
-            # Add
-            mat.node_tree.nodes['Vector Math'].inputs[1].default_value[0] = self.config.uv_add[0]
-            mat.node_tree.nodes['Vector Math'].inputs[1].default_value[1] = self.config.uv_add[1]
-            # Multiply
-            mat.node_tree.nodes['Vector Math.001'].inputs[1].default_value[0] = self.config.uv_multiply[0]
-            mat.node_tree.nodes['Vector Math.001'].inputs[1].default_value[1] = self.config.uv_multiply[1]
-
+            mat = self.MaterialFactory.create_from_file(
+                self.config.material_filename)
         return mat
 
     def build_main_mesh(self, path):
@@ -185,52 +115,32 @@ class RenderCore:
         mesh_obj = bpy.data.objects[self.config.object_name.split(".")[0]]
         mesh_obj.parent = self.parent_object
         mesh_obj.name = 'Mesh'
-        # set material
-        mat = self.choose_material()
-        mesh_obj.active_material = mat
+        mesh_obj.active_material = self.choose_material()
 
     def build_singular_faces(self):
-        # rotate
         if self.config.show_singularities:
-            # build singular faces
-            # set material
-            if self.config.singular_face_material is None:
-                self.MaterialFactory.wireframecolor = (0.026, 0.831, 0.888, 1)
-                mat = self.MaterialFactory.CreateColoredWireframe()
-            else:
-                tmp = self.config.material_filename
-                self.MaterialFactory.material_filename = self.config.singular_face_material
-                mat = self.MaterialFactory.CreateFromFile()
-                self.MaterialFactory.material_filename = tmp
-
             if self.config.object_name[-3:] == 'obj':
                 bpy.ops.import_scene.obj(
                     filepath=self.config.scene_path + "singularFaces.obj", use_split_objects=False)
             else:
                 bpy.ops.import_mesh.ply(
                     filepath=self.config.scene_path + 'singularFaces.ply')
+            self.config.base_color = self.config.singular_colors['-1']
+            mat = self.MaterialFactory.create_bsdf('base', 'wireframe')
             face_obj = bpy.data.objects["singularFaces"]
             face_obj.name = 'Singular Faces'
             face_obj.active_material = mat
 
     def build_loops(self):
         if self.config.show_loops:
-            # build loop mesh
-            if self.config.loop_material is None:
-                self.MaterialFactory.wireframecolor = (1.0, 0.5, 0.2, 1)
-                mat = self.MaterialFactory.CreateColoredWireframe()
-            else:
-                tmp = self.config.material_filename
-                self.MaterialFactory.material_filename = self.config.loop_material
-                mat = self.MaterialFactory.CreateFromFile()
-                self.MaterialFactory.material_filename = tmp
-
             if self.config.object_name[-3:] == 'obj':
                 bpy.ops.import_scene.obj(
                     filepath=self.config.scene_path + "loops.obj", use_split_objects=False)
             else:
                 bpy.ops.import_mesh.ply(
                     filepath=self.config.scene_path + 'loops.ply')
+            self.config.base_color = self.config.loop_color
+            mat = self.MaterialFactory.create_bsdf('base', 'wireframe')
             loop_obj = bpy.data.objects["loops"]
             loop_obj.parent = self.parent_object
             loop_obj.name = 'Loops'
@@ -252,8 +162,8 @@ class RenderCore:
                     return
                 bpy.ops.import_mesh.ply(filepath=path)
 
-            self.MaterialFactory.wireframecolor = (0.2, 0.8, 0.2, 1.0)
-            mat = self.MaterialFactory.CreateColoredWireframe()
+            self.config.base_color = self.config.foliation_graph_color
+            mat = self.MaterialFactory.create_bsdf('base', 'wireframe')
             obj = bpy.data.objects['foliationGraph']
             obj.parent = self.parent_object
             obj.name = 'Foliation Graph'
@@ -278,29 +188,22 @@ class RenderCore:
                         elif self.config.cylinder_mode == 'colors':
                             color = self.config.segment_colors[i % len(
                                 self.config.segment_colors)]
-                            self.MaterialFactory.color = color
-                            obj.active_material = self.MaterialFactory.CreateColored(
-                                f[:-4])
+                            self.config.base_color = color
+                            obj.active_material = self.MaterialFactory.create_bsdf(
+                                'base', 'wireframe')
+                            # obj.active_material = self.MaterialFactory.CreateColored(
+                            #     f[:-4])
 
-    def build_singularity_primitives(self):
+    def build_singular_points(self):
+        if not self.config.show_singularities:
+            return
+
+        # primitives
         scene_collection = bpy.context.scene.collection
         singular_collection = bpy.data.collections.new('Singular')
         for index, color in self.config.singular_colors.items():
-            if self.config.singularity_material is None:
-                self.MaterialFactory.color = color
-                mat = self.MaterialFactory.CreateColored('Singularity' + index)
-            else:
-                tmp = self.config.material_filename
-                self.MaterialFactory.material_filename = self.config.singularity_material
-                mat = self.MaterialFactory.CreateFromFile()
-                self.MaterialFactory.material_filename = tmp
-                if self.config.show_singularity_color == True and\
-                        self.config.singularity_material == "75-phone-screen.blend":
-                    glossy_bsdf_node = mat.node_tree.nodes['Glossy BSDF']
-                    # hex to rgba
-                    glossy_bsdf_node.inputs[0].default_value = self.hex2rgba(
-                        color)
-
+            self.config.base_color = color
+            mat = self.MaterialFactory.create_bsdf('base', 'plain')
             bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4)
             sphere = bpy.data.objects['Icosphere']
             sphere.name = 'Singularity' + index
@@ -310,32 +213,37 @@ class RenderCore:
             singular_collection.objects.link(sphere)
             scene_collection.objects.unlink(sphere)
 
-        if False:
-            bpy.context.scene.render.use_freestyle = True
-            fs = bpy.context.scene.view_layers['View Layer'].freestyle_settings
-            fs.use_culling = True
-            ls = fs.linesets['LineSet']
-            ls.select_by_image_border = False
-            ls.select_by_collection = True
-            ls.collection = bpy.data.collections['Singular']
-            ls.select_border = False
-            ls.select_contour = True
+        # instances
+        singularities_collection = bpy.data.collections.new('Singularities')
+        scene_collection.children.link(singularities_collection)
+        for i, s in enumerate(self.singularity_json):
+            if s['type'] == 'vertex':
+                instance = bpy.data.objects.new(
+                    'Singularity Instance ' + str(i), None)
+                instance.parent = self.parent_object
+                instance.location = self.blender_vec(s['position'])
+                scale = 0
+                if s['index'] > 0:
+                    scale = self.config.pole_scale
+                else:
+                    scale = self.config.zero_scale
+                instance.scale = (scale, scale, scale)
+                instance.instance_type = 'COLLECTION'
+                instance.instance_collection = bpy.data.collections['Singularity' + str(
+                    s['index'])]
+                singularities_collection.objects.link(instance)
 
-    def build_segment_primitives(self):
+    def build_cut(self):
+        if not self.config.show_cut:
+            return
+
+        # cut segment primitives
         scene_collection = bpy.context.scene.collection
-
         for i, color in enumerate(self.config.segment_colors):
-            if self.config.cut_mode == "Plain":
-                color = 0x808080
-
-            if self.config.edge_material is None:
-                self.MaterialFactory.color = color
-                mat = self.MaterialFactory.CreateColored('Segment' + str(i))
-            else:
-                tmp = self.config.material_filename
-                self.MaterialFactory.material_filename = self.config.edge_material
-                mat = self.MaterialFactory.CreateFromFile()
-                self.MaterialFactory.material_filename = tmp
+            if self.config.cut_mode == "plain":
+                color = self.config.cut_color
+            self.config.base_color = color
+            mat = self.MaterialFactory.create_bsdf('base', 'plain')
 
             bpy.ops.mesh.primitive_cylinder_add()
             cylinder = bpy.data.objects['Cylinder']
@@ -355,49 +263,7 @@ class RenderCore:
             vertex_collection.objects.link(sphere)
             scene_collection.objects.unlink(sphere)
 
-    def build_trace_lines(self, lines, name, color):
-        self.MaterialFactory.color = color
-        mat = self.MaterialFactory.CreateColored(name)
-
-        curves = bpy.data.curves.new(name, 'CURVE')
-        curves.dimensions = '3D'
-        curves.bevel_depth = self.config.trace_scale
-        for line in lines:
-            polyline = curves.splines.new('POLY')
-            polyline.points.add(len(line) - 1)
-            for i, p in enumerate(line):
-                polyline.points[i].co = (p[0], p[1], p[2], 1)
-
-        tracelines = bpy.data.objects.new(name, curves)
-        tracelines.parent = self.parent_object
-        tracelines.active_material = mat
-        bpy.data.collections['Trace Lines'].objects.link(tracelines)
-
-    def build_addons(self):
-        scene_collection = bpy.context.scene.collection
-
-        # singularities
-        singularities_collection = bpy.data.collections.new('Singularities')
-        scene_collection.children.link(singularities_collection)
-        for i, s in enumerate(self.singularity_json):
-            if s['type'] == 'vertex':
-                instance = bpy.data.objects.new(
-                    'Singularity Instance ' + str(i), None)
-                instance.parent = self.parent_object
-                instance.location = self.blender_vec(s['position'])
-                scale = 0
-                if s['index'] > 0:
-                    scale = self.config.pole_scale
-                else:
-                    scale = self.config.zero_scale
-                instance.scale = (scale, scale, scale)
-                instance.instance_type = 'COLLECTION'
-                instance.instance_collection = bpy.data.collections['Singularity' + str(
-                    s['index'])]
-                if self.config.show_singularities == True:
-                    singularities_collection.objects.link(instance)
-
-        # cuts
+        # instances
         cuts_collection = bpy.data.collections.new('Cuts')
         scene_collection.children.link(cuts_collection)
         for i, c in enumerate(self.cut_json):
@@ -416,10 +282,10 @@ class RenderCore:
                 (0, 0, 1)).rotation_difference(p0 - p1)
             edge_instance.instance_type = 'COLLECTION'
 
-            if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
+            if self.config.cut_mode == "segment" or self.config.cut_mode == "plain":
                 edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment ' + str(
                     seg)]
-            elif self.config.cut_mode == "zero_mode":
+            elif self.config.cut_mode == "zero":
                 if c['zeroConnected'] == False:
                     edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 14']
                 elif c['zeroConnected'] == True:
@@ -428,10 +294,8 @@ class RenderCore:
                 if c['incoherent'] == False:
                     edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 14']
                 elif c['incoherent'] == True:
-                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 11']
-
-            if self.config.cut_mode != "None":
-                cuts_collection.objects.link(edge_instance)
+                    edge_instance.instance_collection = bpy.data.collections['Cut Edge Segment 5']
+            cuts_collection.objects.link(edge_instance)
 
             vertex_instance = bpy.data.objects.new(
                 'Cut Vertex Instance ' + str(i * 2), None)
@@ -441,10 +305,10 @@ class RenderCore:
                 self.config.edge_scale, self.config.edge_scale, self.config.edge_scale)
             vertex_instance.instance_type = 'COLLECTION'
             # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
+            if self.config.cut_mode == "segment" or self.config.cut_mode == "plain":
                 vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(
                     seg)]
-            elif self.config.cut_mode == "zero_mode":
+            elif self.config.cut_mode == "zero":
                 if c['zeroConnected'] == False:
                     vertex_instance.instance_collection = bpy.data.collections[
                         'Cut Vertex Segment 14']
@@ -457,9 +321,8 @@ class RenderCore:
                 elif c['incoherent'] == True:
                     vertex_instance.instance_collection = bpy.data.collections[
                         'Cut Vertex Segment 11']
+            cuts_collection.objects.link(vertex_instance)
 
-            if self.config.cut_mode != "None":
-                cuts_collection.objects.link(vertex_instance)
             vertex_instance = bpy.data.objects.new(
                 'Cut Vertex Instance ' + str(i * 2 + 1), None)
             vertex_instance.parent = self.parent_object
@@ -468,10 +331,10 @@ class RenderCore:
                 self.config.edge_scale, self.config.edge_scale, self.config.edge_scale)
             vertex_instance.instance_type = 'COLLECTION'
             # vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(seg)]
-            if self.config.cut_mode == "Segment" or self.config.cut_mode == "Plain":
+            if self.config.cut_mode == "segment" or self.config.cut_mode == "plain":
                 vertex_instance.instance_collection = bpy.data.collections['Cut Vertex Segment ' + str(
                     seg)]
-            elif self.config.cut_mode == "zero_mode":
+            elif self.config.cut_mode == "zero":
                 if c['zeroConnected'] == False:
                     vertex_instance.instance_collection = bpy.data.collections[
                         'Cut Vertex Segment 14']
@@ -484,22 +347,39 @@ class RenderCore:
                 elif c['incoherent'] == True:
                     vertex_instance.instance_collection = bpy.data.collections[
                         'Cut Vertex Segment 11']
+            cuts_collection.objects.link(vertex_instance)
 
-            if self.config.cut_mode != "None":
-                cuts_collection.objects.link(vertex_instance)
+    def build_trace(self, lines, name, color):
+        self.config.base_color = color
+        mat = self.MaterialFactory.create_bsdf('base', 'plain')
+        curves = bpy.data.curves.new(name, 'CURVE')
+        curves.dimensions = '3D'
+        curves.bevel_depth = self.config.trace_scale
+        for line in lines:
+            polyline = curves.splines.new('POLY')
+            polyline.points.add(len(line) - 1)
+            for i, p in enumerate(line):
+                polyline.points[i].co = (p[0], p[1], p[2], 1)
+        tracelines = bpy.data.objects.new(name, curves)
+        tracelines.parent = self.parent_object
+        tracelines.active_material = mat
+        bpy.data.collections['Trace Lines'].objects.link(tracelines)
 
-        # trace lines
-        if self.config.show_trace_lines:
-            trace_collection = bpy.data.collections.new('Trace Lines')
-            scene_collection.children.link(trace_collection)
-            self.build_trace_lines(
-                self.trace_json['primalTraceLines'], 'Primal trace', self.config.primal_trace_color)
-            self.build_trace_lines(
-                self.trace_json['primalCriticalTraceLines'], 'Primal critical trace', self.config.primal_trace_color)
-            self.build_trace_lines(
-                self.trace_json['conjugateTraceLines'], 'Conjugate trace', self.config.conjugate_trace_color)
-            self.build_trace_lines(
-                self.trace_json['conjugateCriticalTraceLines'], 'Conjugate critical trace', self.config.conjugate_trace_color)
+    def build_trace_lines(self):
+        if not self.config.show_trace_lines:
+            return
+
+        scene_collection = bpy.context.scene.collection
+        trace_collection = bpy.data.collections.new('Trace Lines')
+        scene_collection.children.link(trace_collection)
+        self.build_trace(
+            self.trace_json['primalTraceLines'], 'Primal trace', self.config.primal_trace_color)
+        self.build_trace(
+            self.trace_json['primalCriticalTraceLines'], 'Primal critical trace', self.config.primal_trace_color)
+        self.build_trace(
+            self.trace_json['conjugateTraceLines'], 'Conjugate trace', self.config.conjugate_trace_color)
+        self.build_trace(
+            self.trace_json['conjugateCriticalTraceLines'], 'Conjugate critical trace', self.config.conjugate_trace_color)
 
     def build_parent_object(self):
         self.parent_object = bpy.data.objects.new("Parent Object", None)
@@ -656,13 +536,13 @@ class RenderCore:
                             self.config.width, self.config.height)
         self.build_parent_object()
         self.build_main_mesh(self.config.scene_path + self.config.object_name)
-        self.build_singular_faces()
         self.build_loops()
+        self.build_cut()
+        self.build_singular_faces()
+        self.build_singular_points()
+        self.build_trace_lines()
         self.build_foliation_graph()
         self.build_cylinders()
-        self.build_singularity_primitives()
-        self.build_segment_primitives()
-        self.build_addons()
         self.build_ground()
         self.build_camera()
         self.build_direct_light()
@@ -700,41 +580,6 @@ class RenderCore:
                 self.config.scene_name = scene_list[i]
                 self.config.output_path = output_path
                 self.renderSingle()
-
-    def renderModelDir(self):
-        f_list = os.listdir(self.config.scene_path)
-        obj_list = []
-        for filename in f_list:
-            if os.path.splitext(filename)[1] == '.obj':
-                # object_file
-                obj_list.append(filename)
-        for i in range(len(obj_list)):
-            path = os.getcwd()
-            path = os.path.dirname(path)
-            path = os.path.dirname(path)
-            path = os.path.dirname(path)
-            output_path = path + "/Output/" + \
-                obj_list[i].split(".")[0] + ".png"
-            self.config.output_path = output_path
-            self.config.object_name = obj_list[i]
-            self.renderSingle()
-
-    def renderModelMaterial(self):
-        material_list = ['original', 'gold', 'glass', 'ceramic', 'roughblue', 'wireframe',
-                         'peeling_paint', 'paint', 'Metal01',
-                         'Metal07', 'Metal08', 'Metal26', 'WoodFloor01', 'Marble01', 'Leather05',
-                         'Fabric02', 'Fabric03', 'Concrete07', 'Chainmail02', 'vertex_color'
-                         ]
-        for material in material_list:
-            self.config.material = material
-            path = os.getcwd()
-            path = os.path.dirname(path)
-            path = os.path.dirname(path)
-            path = os.path.dirname(path)
-            output_path = path + "/Output/" + \
-                self.config.object_name.split(".")[0] + "_" + material + ".png"
-            self.config.output_path = output_path
-            self.renderSingle()
 
     def renderRotation(self):
         prefix = self.config.output_path.split(".png")[0]
@@ -787,10 +632,6 @@ class RenderCore:
             self.renderSingle()
         elif self.config.mode == "dir":
             self.renderDir()
-        elif self.config.mode == "modeldir":
-            self.renderModelDir()
-        elif self.config.mode == "modelmaterial":
-            self.renderModelMaterial()
         elif self.config.mode == "rotation":
             self.renderRotation()
         elif self.config.mode == 'rotation_animation':
