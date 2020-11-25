@@ -27,6 +27,7 @@ class RenderCore:
         cut_json_path = self.config.scene_path + self.config.cut_json_name
         singularity_json_path = self.config.scene_path + self.config.singularity_json_name
         trace_json_path = self.config.scene_path + self.config.trace_json_name
+        skeleton_json_path = self.config.scene_path + self.config.skeleton_json_name
         if os.path.exists(cut_json_path):
             cut_file = open(cut_json_path)
             cut_json = json.load(cut_file)
@@ -39,6 +40,10 @@ class RenderCore:
             trace_file = open(trace_json_path)
             trace_json = json.load(trace_file)
             self.trace_json = trace_json
+        if os.path.exists(skeleton_json_path):
+            skeleton_file = open(skeleton_json_path)
+            skeleton_json = json.load(skeleton_file)
+            self.skeleton_json = skeleton_json
 
     def clean(self):
         for item in bpy.data.collections:
@@ -381,6 +386,60 @@ class RenderCore:
         self.build_trace(
             self.trace_json['conjugateCriticalTraceLines'], 'Conjugate critical trace', self.config.conjugate_trace_color)
 
+    def build_skeleton(self):
+        if not self.config.show_skeleton:
+            return
+
+        scene_collection = bpy.context.scene.collection
+        skeleton_collection = bpy.data.collections.new('Skeleton')
+        scene_collection.children.link(skeleton_collection)
+
+        self.config.base_color = self.config.skeleton_curve_color
+        curve_mat = self.MaterialFactory.create_bsdf('base', 'plain')
+        self.config.base_color = self.config.skeleton_node_color
+        node_mat = self.MaterialFactory.create_bsdf('base', 'plain')
+
+        curves = bpy.data.curves.new('skeleton curves', 'CURVE')
+        curves.dimensions = '3D'
+        curves.bevel_depth = self.config.skeleton_curve_scale
+
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4)
+        node = bpy.data.objects['Icosphere']
+        node.name = 'skeleton node'
+        node.active_material = node_mat
+        node_collection = bpy.data.collections.new('skeleton node')
+        node_collection.objects.link(node)
+        scene_collection.objects.unlink(node)
+
+        for bone in self.skeleton_json['skeleton']:
+            polyline = curves.splines.new('POLY')
+            polyline.points.add(len(bone) - 1)
+            for i, p in enumerate(bone):
+                polyline.points[i].co = (p[0], p[1], p[2], 1)
+
+            node1 = bpy.data.objects.new('skeleton node instance', None)
+            node1.parent = self.parent_object
+            node1.location = self.blender_vec(bone[0])
+            scale = self.config.skeleton_node_scale
+            node1.scale = (scale, scale, scale)
+            node1.instance_type = 'COLLECTION'
+            node1.instance_collection = node_collection
+            skeleton_collection.objects.link(node1)
+
+            node2 = bpy.data.objects.new('skeleton node instance', None)
+            node2.parent = self.parent_object
+            node2.location = self.blender_vec(bone[-1])
+            scale = self.config.skeleton_node_scale
+            node2.scale = (scale, scale, scale)
+            node2.instance_type = 'COLLECTION'
+            node2.instance_collection = node_collection
+            skeleton_collection.objects.link(node2)
+
+        skeleton_curves = bpy.data.objects.new('skeleton curves', curves)
+        skeleton_curves.parent = self.parent_object
+        skeleton_curves.active_material = curve_mat
+        skeleton_collection.objects.link(skeleton_curves)
+
     def build_parent_object(self):
         self.parent_object = bpy.data.objects.new("Parent Object", None)
         self.parent_object.rotation_mode = 'XYZ'
@@ -543,6 +602,7 @@ class RenderCore:
         self.build_trace_lines()
         self.build_foliation_graph()
         self.build_cylinders()
+        self.build_skeleton()
         self.build_ground()
         self.build_camera()
         self.build_direct_light()

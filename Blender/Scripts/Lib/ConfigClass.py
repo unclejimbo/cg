@@ -14,6 +14,7 @@ class Config:
         self.singularity_json_name = "singularities.json"
         self.transform_json_name = "transform.json"
         self.trace_json_name = "traceLines.json"
+        self.skeleton_json_name = 'skeleton.json'
         self.object_name = "mesh.obj"
 
         # renderer
@@ -84,6 +85,14 @@ class Config:
         # cylinder
         self.show_cylinders = False
         self.cylinder_mode = 'plain'
+
+        # skeleon
+        self.show_skeleton = False
+        self.skleton_mode = 'plain'
+        self.skeleton_curve_color = 0x000000
+        self.skeleton_node_color = 0xFF0000
+        self.skeleton_curve_scale = 0.01
+        self.skeleton_node_scale = 0.02
 
         # animation
         self.rotation_start = 0
