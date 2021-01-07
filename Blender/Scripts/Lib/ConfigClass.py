@@ -4,6 +4,8 @@ import json
 
 class Config:
     def __init__(self):
+        self.overwrite = True
+
         # paths
         self.scene_path = './'
         self.data_path = os.path.dirname(
@@ -74,6 +76,8 @@ class Config:
 
         # trace lines
         self.show_trace_lines = True
+        self.show_critical_trace = True
+        self.show_general_trace = True
         self.trace_scale = 0.001
         self.primal_trace_color = 0xFF0000
         self.conjugate_trace_color = 0x00FF00

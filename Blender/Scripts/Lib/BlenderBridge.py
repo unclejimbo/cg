@@ -20,8 +20,8 @@ if __name__ == '__main__':
         load_dict = json.load(load_f)
 
     config = Config()
-    # update
     config.__dict__ = load_dict
-    RenderClass = RenderCore(config)
-    RenderClass.render()
+    if config.overwrite or not os.path.exists(config.output_path):
+        RenderClass = RenderCore(config)
+        RenderClass.render()
 
